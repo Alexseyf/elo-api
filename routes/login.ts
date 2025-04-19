@@ -42,13 +42,20 @@ router.post("/", async (req, res) => {
         { expiresIn: "1h" },
       )
 
-      res.status(200).json({
+      // Verificar se é o primeiro acesso do usuário
+      const primeiroAcesso = !usuario.senhaAlterada
+      
+      // Incluir status de primeiro acesso na resposta
+      const resposta = {
         id: usuario.id,
         nome: usuario.nome,
         email: usuario.email,
         roles: roles,
         token,
-      })
+        primeiroAcesso, // Flag que indica se o usuário precisa alterar a senha
+      }
+
+      res.status(200).json(resposta)
 
       await prisma.log.create({
         data: {
@@ -59,15 +66,6 @@ router.post("/", async (req, res) => {
       })
       return
     }
-    // if (usuario) {
-    //   await prisma.log.create({
-    //     data: {
-    //       descricao: "Tentativa de Acesso Inválida",
-    //       complemento: `Funcionário: ${usuario.email}`,
-    //       usuarioId: usuario.id,
-    //     },
-    //   })
-    // }
 
     res.status(400).json({ erro: msg })
   } catch (error) {

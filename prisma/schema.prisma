@@ -18,6 +18,7 @@ model Usuario {
   updatedAt         DateTime                @updatedAt
   resetToken        String?
   resetTokenExpires DateTime?
+  senhaAlterada     Boolean                 @default(false)  // Novo campo para rastrear primeiro acesso
 
   roles             UsuarioRole[]
   turmasLecionadas  ProfessorTurma[]        

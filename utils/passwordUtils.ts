@@ -36,3 +36,22 @@ export function passwordCheck(senha: string): string[] {
     }
     return errorMessage
   }
+
+/**
+ * Gera uma senha padrão para novos usuários
+ * A senha gerada será baseada no email do usuário e terá pelo menos 8 caracteres
+ * @param email Email do usuário
+ * @returns Uma senha padrão segura para usuários recém-criados
+ */
+export function generateDefaultPassword(email: string): string {
+  // Pega a parte do email antes do @
+  const userPart = email.split('@')[0];
+  
+  // Adiciona um timestamp como sufixo para garantir unicidade e complexidade
+  const timestamp = new Date().getTime().toString().substring(6, 10);
+  
+  // Combina com caracteres especiais para garantir os requisitos de segurança
+  const defaultPassword = `${userPart}_${timestamp}!Esc`;
+  
+  return defaultPassword;
+}

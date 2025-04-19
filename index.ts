@@ -42,6 +42,7 @@ app.use('/professores', professoresRouter)
 app.use("/login", routesLogin)
 app.use("/recupera-senha", routesRecuperaSenha)
 app.use("/valida-senha", routesValidaSenha)
+app.use("/alterar-senha", routesValidaSenha) // Adicionamos a nova rota para alteração de senha
 
 app.get('/', (req, res) => {
   res.send('API - Escola Educação Infantil')
