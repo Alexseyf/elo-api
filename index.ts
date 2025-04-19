@@ -18,13 +18,20 @@ app.use((req, res, next) => {
   next()
 })
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs))
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs, {
+  swaggerOptions: {
+    persistAuthorization: true,
+    tryItOutEnabled: true,
+    displayRequestDuration: true
+  }
+}))
 
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Origin'], 
   exposedHeaders: ['Authorization', 'Access-Control-Allow-Origin'],
+  credentials: true
 }))
 
 app.use(express.json())
