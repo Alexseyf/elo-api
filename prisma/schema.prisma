@@ -176,7 +176,7 @@ model DiarioItemProvidencia {
 
 enum ITEM_PROVIDENCIA {
   FRALDA
-  LENCO_UMIDECIDO
+  LENCO_UMIDECIDO // Corrigido para coincidir com a migração
   LEITE
   CREME_DENTAL
   ESCOVA_DE_DENTE
