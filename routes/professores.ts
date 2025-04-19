@@ -47,7 +47,4 @@ router.get("/:professorId/turmas",  async (req, res) => {
   }
 })
 
-
-
-
 export default router 

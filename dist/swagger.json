@@ -13,6 +13,10 @@
         {
             "url": "http://localhost:3000",
             "description": "Servidor local"
+        },
+        {
+            "url": "https://elo-api-alexseyfs-projects.vercel.app",
+            "description": "Servidor em produção"
         }
     ],
     "paths": {
