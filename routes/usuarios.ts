@@ -86,7 +86,7 @@ router.post("/", async (req, res) => {
         email: valida.data.email,
         senha: hash,
         telefone: valida.data.telefone,
-        senhaAlterada: !!valida.data.senha, // Se a senha foi fornecida, marca como alterada
+        senhaAlterada: !!valida.data.senha,
         roles: {
           create: valida.data.roles.map(role => ({
             role: {
@@ -100,10 +100,8 @@ router.post("/", async (req, res) => {
       }
     })
 
-    // Remove o hash da senha da resposta
     const { senha, ...usuarioSemSenha } = usuario
     
-    // Enviar senha por email se for uma senha padrão (primeiro acesso)
     if (!valida.data.senha) {
       await enviarEmailSenhaPadrao(usuario.email, usuario.nome, senhaParaUsar);
       
