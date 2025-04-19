@@ -1,0 +1,583 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Escolar",
+        "description": "Essa API é um sistema de gerenciamento escolar que permite o cadastro de administradores, alunos, responsáveis e professores, além de possibilitar a criação de turmas e o registro dos diários dos alunos que relatam sua rotina escolar.",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "email": "alexseyf66@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3000",
+            "description": "Servidor local"
+        }
+    ],
+    "paths": {
+        "/usuarios": {
+            "summary": "Operações de usuários",
+            "description": "Gerenciamento de usuários do sistema",
+            "get": {
+                "summary": "Lista usuários",
+                "description": "Lista todos os usuários cadastrados, exceto alunos",
+                "tags": ["Usuarios"],
+                "responses": {
+                    "200": {
+                        "description": "Operação bem-sucedida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Usuario"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Não autorizado"
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Cria um novo usuário",
+                "description": "Adiciona um novo usuário ao sistema",
+                "tags": ["Usuarios"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Usuario"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuário criado com sucesso"
+                    },
+                    "400": {
+                        "description": "Dados inválidos"
+                    },
+                    "500": {
+                        "description": "Erro interno do servidor"
+                    }
+                }
+            }
+        },
+        "/login": {
+            "summary": "Autenticação de usuários",
+            "description": "Operações de login no sistema",
+            "post": {
+                "summary": "Autenticar usuário",
+                "description": "Realiza o login do usuário e retorna o token JWT",
+                "tags": ["Autenticação"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "senha": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": ["email", "senha"]
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login bem-sucedido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "number"
+                                        },
+                                        "nome": {
+                                            "type": "string"
+                                        },
+                                        "email": {
+                                            "type": "string"
+                                        },
+                                        "roles": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "token": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Credenciais inválidas"
+                    }
+                }
+            }
+        },
+        "/alunos": {
+            "summary": "Operações com alunos",
+            "description": "Gerenciamento de alunos do sistema",
+            "get": {
+                "summary": "Lista alunos",
+                "description": "Lista todos os alunos cadastrados",
+                "tags": ["Alunos"],
+                "responses": {
+                    "200": {
+                        "description": "Operação bem-sucedida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Aluno"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro ao buscar alunos"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Cria um novo aluno",
+                "description": "Adiciona um novo aluno ao sistema",
+                "tags": ["Alunos"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Aluno"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Aluno criado com sucesso"
+                    },
+                    "400": {
+                        "description": "Dados inválidos"
+                    }
+                }
+            }
+        },
+        "/alunos/responsavel": {
+            "summary": "Associação de responsáveis a alunos",
+            "description": "Vincula um responsável a um aluno",
+            "post": {
+                "summary": "Associa um responsável a um aluno",
+                "description": "Cria uma relação entre um usuário com role RESPONSAVEL e um aluno",
+                "tags": ["Alunos"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "alunoId": {
+                                        "type": "number"
+                                    },
+                                    "usuarioId": {
+                                        "type": "number"
+                                    }
+                                },
+                                "required": ["alunoId", "usuarioId"]
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Associação criada com sucesso"
+                    },
+                    "400": {
+                        "description": "Dados inválidos ou usuário não possui role RESPONSAVEL"
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado"
+                    }
+                }
+            }
+        },
+        "/turmas": {
+            "summary": "Operações com turmas",
+            "description": "Gerenciamento de turmas do sistema",
+            "get": {
+                "summary": "Lista turmas",
+                "description": "Lista todas as turmas cadastradas",
+                "tags": ["Turmas"],
+                "responses": {
+                    "200": {
+                        "description": "Operação bem-sucedida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Turma"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro ao buscar turmas"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Cria uma nova turma",
+                "description": "Adiciona uma nova turma ao sistema",
+                "tags": ["Turmas"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TurmaInput"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Turma criada com sucesso"
+                    },
+                    "400": {
+                        "description": "Dados inválidos"
+                    }
+                }
+            }
+        },
+        "/turmas/professor": {
+            "summary": "Associação de professores a turmas",
+            "description": "Vincula um professor a uma turma",
+            "post": {
+                "summary": "Associa um professor a uma turma",
+                "description": "Cria uma relação entre um usuário com role PROFESSOR e uma turma",
+                "tags": ["Turmas"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "turmaId": {
+                                        "type": "number"
+                                    },
+                                    "usuarioId": {
+                                        "type": "number"
+                                    }
+                                },
+                                "required": ["turmaId", "usuarioId"]
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Associação criada com sucesso"
+                    },
+                    "400": {
+                        "description": "Dados inválidos ou usuário não possui role PROFESSOR"
+                    },
+                    "404": {
+                        "description": "Usuário não encontrado"
+                    }
+                }
+            }
+        },
+        "/turmas/{turmaId}/alunos": {
+            "summary": "Alunos de uma turma",
+            "description": "Obtém os alunos de uma turma específica",
+            "get": {
+                "summary": "Lista alunos de uma turma",
+                "description": "Retorna todos os alunos pertencentes a uma determinada turma",
+                "tags": ["Turmas"],
+                "parameters": [
+                    {
+                        "name": "turmaId",
+                        "in": "path",
+                        "description": "ID da turma",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operação bem-sucedida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Aluno"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro ao buscar alunos"
+                    },
+                    "404": {
+                        "description": "Turma não encontrada"
+                    }
+                }
+            }
+        },
+        "/professores/{professorId}/turmas": {
+            "summary": "Turmas de um professor",
+            "description": "Obtém as turmas de um professor específico",
+            "get": {
+                "summary": "Lista turmas de um professor",
+                "description": "Retorna todas as turmas associadas a um determinado professor",
+                "tags": ["Professores"],
+                "parameters": [
+                    {
+                        "name": "professorId",
+                        "in": "path",
+                        "description": "ID do professor (usuário com role PROFESSOR)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operação bem-sucedida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Turma"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Erro ao buscar turmas"
+                    },
+                    "404": {
+                        "description": "Professor não encontrado"
+                    }
+                }
+            }
+        },
+        "/recuperaSenha": {
+            "summary": "Recuperação de senha",
+            "description": "Envia código de recuperação de senha por email",
+            "post": {
+                "summary": "Solicita código de recuperação de senha",
+                "description": "Gera um código de recuperação e envia para o email do usuário",
+                "tags": ["Autenticação"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": ["email"]
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Código de recuperação enviado com sucesso"
+                    },
+                    "400": {
+                        "description": "Email não fornecido"
+                    }
+                }
+            }
+        },
+        "/validaSenha": {
+            "summary": "Validação de senha e redefinição",
+            "description": "Valida o código de recuperação e redefine a senha",
+            "post": {
+                "summary": "Redefine a senha com código de recuperação",
+                "description": "Valida o código enviado por email e atualiza a senha do usuário",
+                "tags": ["Autenticação"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "code": {
+                                        "type": "string"
+                                    },
+                                    "novaSenha": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": ["email", "code", "novaSenha"]
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Senha alterada com sucesso"
+                    },
+                    "400": {
+                        "description": "Campos obrigatórios não fornecidos, código inválido/expirado ou validação de senha falhou"
+                    },
+                    "404": {
+                        "description": "Email não encontrado"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Usuario": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "number"
+                    },
+                    "nome": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "senha": {
+                        "type": "string"
+                    },
+                    "telefone": {
+                        "type": "string"
+                    },
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": ["ADMIN", "PROFESSOR", "RESPONSAVEL"]
+                        }
+                    }
+                },
+                "required": ["nome", "email", "senha", "telefone", "roles"]
+            },
+            "Aluno": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "number"
+                    },
+                    "nome": {
+                        "type": "string"
+                    },
+                    "dataNasc": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "turmaId": {
+                        "type": "number"
+                    },
+                    "isAtivo": {
+                        "type": "boolean"
+                    },
+                    "turma": {
+                        "$ref": "#/components/schemas/Turma"
+                    },
+                    "responsaveis": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Usuario"
+                        }
+                    }
+                },
+                "required": ["nome", "dataNasc", "turmaId"]
+            },
+            "Turma": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "number"
+                    },
+                    "nome": {
+                        "type": "string",
+                        "enum": ["INFANTIL_1", "INFANTIL_2", "INFANTIL_3", "INFANTIL_4", "INFANTIL_5"]
+                    },
+                    "professores": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Usuario"
+                        }
+                    },
+                    "alunos": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Aluno"
+                        }
+                    }
+                }
+            },
+            "TurmaInput": {
+                "type": "object",
+                "properties": {
+                    "nome": {
+                        "type": "string",
+                        "enum": ["INFANTIL_1", "INFANTIL_2", "INFANTIL_3", "INFANTIL_4", "INFANTIL_5"]
+                    }
+                },
+                "required": ["nome"]
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ]
+}

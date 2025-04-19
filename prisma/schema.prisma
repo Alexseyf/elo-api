@@ -1,0 +1,207 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id                Int                     @id @default(autoincrement())
+  nome              String                  @db.VarChar(60)
+  email             String                  @db.VarChar(40) @unique
+  senha             String                  @db.VarChar(60)
+  telefone          String                  @db.VarChar(20)
+  isAtivo           Boolean                 @default(true)
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  resetToken        String?
+  resetTokenExpires DateTime?
+
+  roles             UsuarioRole[]
+  turmasLecionadas  ProfessorTurma[]        
+  alunosResponsavel ResponsavelAluno[]      
+  logs              Log[]                  
+
+  @@map("usuarios")
+}
+
+model Role {
+  id        Int            @id @default(autoincrement())
+  tipo      TIPO_USUARIO   @unique
+  usuarios  UsuarioRole[]
+
+  @@map("roles")
+}
+
+model UsuarioRole {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int
+  roleId    Int
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  role      Role     @relation(fields: [roleId], references: [id])
+
+  @@unique([usuarioId, roleId])
+  @@map("usuario_roles")
+}
+
+model Turma {
+  id          Int               @id @default(autoincrement())
+  nome        TURMA             @unique
+  alunos      Aluno[]
+  professores ProfessorTurma[]  
+
+  @@map("turmas")
+}
+
+model ProfessorTurma {
+  id          Int       @id @default(autoincrement())
+  usuarioId   Int
+  turmaId     Int
+  usuario     Usuario   @relation(fields: [usuarioId], references: [id])
+  turma       Turma     @relation(fields: [turmaId], references: [id])
+
+  @@unique([usuarioId, turmaId])
+  @@map("professores_turmas")
+}
+
+enum TURMA {
+  BERCARIO2
+  MATERNAL1
+  MATERNAL2
+  PRE1
+  PRE2
+  TURNOINVERSO
+}
+
+model Aluno {
+  id           Int                @id @default(autoincrement())
+  nome         String             @db.VarChar(60)
+  dataNasc     DateTime
+  isAtivo      Boolean            @default(true)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  turma        Turma              @relation(fields: [turmaId], references: [id])
+  turmaId      Int
+  diario       Diario[]
+  responsaveis ResponsavelAluno[]
+
+  @@map("alunos")
+}
+
+enum TIPO_USUARIO {
+  ADMIN
+  PROFESSOR
+  RESPONSAVEL
+}
+
+model ResponsavelAluno {
+  id            Int       @id @default(autoincrement())
+  alunoId       Int
+  usuarioId     Int
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  aluno         Aluno     @relation(fields: [alunoId], references: [id])
+  usuario       Usuario   @relation(fields: [usuarioId], references: [id])
+
+  @@unique([alunoId, usuarioId])
+  @@map("responsaveis_alunos")
+}
+
+model Log {
+  id          Int       @id @default(autoincrement())
+  descricao   String    @db.VarChar(60)
+  complemento String    @db.VarChar(255)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  usuarioId   Int
+  usuario     Usuario   @relation(fields: [usuarioId], references: [id])
+
+  @@map("logs")
+}
+
+model Diario {
+  id               Int                     @id @default(autoincrement())
+  data             DateTime                @db.Date
+  observacoes      String                  @db.VarChar(500)
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  alunoId          Int
+  disposicao       DISPOSICAO?
+  lancheManha      REFEICAO                @default(NAO_SE_APLICA)
+  almoco           REFEICAO                @default(NAO_SE_APLICA)
+  lancheTarde      REFEICAO                @default(NAO_SE_APLICA)
+  leite            REFEICAO                @default(NAO_SE_APLICA)
+  evacuacao        EVACUACAO?
+  aluno            Aluno                   @relation(fields: [alunoId], references: [id])
+  periodosSono     PeriodoSono[]
+  itensProvidencia DiarioItemProvidencia[]
+
+  @@unique([alunoId, data])
+  @@map("diarios")
+}
+
+model PeriodoSono {
+  id            Int       @id @default(autoincrement())
+  horaDormiu    String    @db.VarChar(5)   // Formato "HH:MM" 
+  horaAcordou   String    @db.VarChar(5)   // Formato "HH:MM"
+  tempoTotal    String    @db.VarChar(5)   // Formato "HH:MM"
+  diarioId      Int
+  diario        Diario    @relation(fields: [diarioId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@map("periodos_sono")
+}
+
+model ItemProvidencia {
+  id        Int                     @id @default(autoincrement())
+  nome      ITEM_PROVIDENCIA        @unique
+  diarios   DiarioItemProvidencia[]
+
+  @@map("itens_providencia")
+}
+
+model DiarioItemProvidencia {
+  id                Int             @id @default(autoincrement())
+  diarioId          Int
+  itemProvidenciaId Int
+  diario            Diario          @relation(fields: [diarioId], references: [id])
+  itemProvidencia   ItemProvidencia @relation(fields: [itemProvidenciaId], references: [id])
+
+  @@unique([diarioId, itemProvidenciaId])
+  @@map("diario_itens_providencia")
+}
+
+enum ITEM_PROVIDENCIA {
+  FRALDA
+  LENCO_UMIDECIDO
+  LEITE
+  CREME_DENTAL
+  ESCOVA_DE_DENTE
+  POMADA
+}
+
+enum DISPOSICAO {
+  AGITADO
+  NORMAL
+  CALMO
+  SONOLENTO
+  CANSADO
+}
+
+enum REFEICAO {
+  OTIMO
+  BOM
+  REGULAR
+  NAO_ACEITOU
+  NAO_SE_APLICA
+}
+
+enum EVACUACAO {
+  NORMAL
+  LIQUIDA
+  DURA
+  NAO_EVACUOU
+}
