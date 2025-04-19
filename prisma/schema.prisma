@@ -18,7 +18,7 @@ model Usuario {
   updatedAt         DateTime                @updatedAt
   resetToken        String?
   resetTokenExpires DateTime?
-  senhaAlterada     Boolean                 @default(false)  // Novo campo para rastrear primeiro acesso
+  senhaAlterada     Boolean                 @default(false)
 
   roles             UsuarioRole[]
   turmasLecionadas  ProfessorTurma[]        
@@ -177,7 +177,7 @@ model DiarioItemProvidencia {
 
 enum ITEM_PROVIDENCIA {
   FRALDA
-  LENCO_UMIDECIDO // Corrigido para coincidir com a migração
+  LENCO_UMEDECIDO
   LEITE
   CREME_DENTAL
   ESCOVA_DE_DENTE
