@@ -47,4 +47,51 @@ router.get("/:professorId/turmas",  async (req, res) => {
   }
 })
 
-export default router 
+router.get("/professor-turma", async (req, res) => {
+  try {
+    const professores = await prisma.usuario.findMany({
+      where: {
+        roles: {
+          some: {
+            role: {
+              tipo: "PROFESSOR"
+            }
+          }
+        },
+        isAtivo: true
+      },
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        telefone: true,
+        turmasLecionadas: {
+          include: {
+            turma: true
+          }
+        }
+      }
+    });
+
+    const professoresComTurmas = professores.map(professor => ({
+      id: professor.id,
+      nome: professor.nome,
+      email: professor.email,
+      telefone: professor.telefone,
+      turmas: professor.turmasLecionadas.map(pt => ({
+        id: pt.turma.id,
+        nome: pt.turma.nome
+      }))
+    }));
+
+    res.status(200).json(professoresComTurmas);
+  } catch (error) {
+    console.error("Erro ao buscar professores e turmas:", error);
+    res.status(500).json({ 
+      erro: "Erro ao buscar professores e turmas", 
+      detalhes: error instanceof Error ? error.message : "Erro desconhecido" 
+    });
+  }
+});
+
+export default router
