@@ -94,4 +94,84 @@ router.get("/professor-turma", async (req, res) => {
   }
 });
 
+router.delete("/:professorId/turma/:turmaId", async (req, res) => {
+  try {
+    const professorId = parseInt(req.params.professorId);
+    const turmaId = parseInt(req.params.turmaId);
+
+    if (isNaN(professorId) || isNaN(turmaId)) {
+      return res.status(400).json({ 
+        erro: "IDs inválidos", 
+        detalhes: "Os IDs do professor e da turma devem ser números" 
+      });
+    }
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: professorId },
+      include: {
+        roles: {
+          include: {
+            role: true
+          }
+        }
+      }
+    });
+
+    if (!usuario) {
+      return res.status(404).json({ erro: "Professor não encontrado" });
+    }
+
+    const isProfessor = usuario.roles.some(ur => ur.role.tipo === "PROFESSOR");
+    if (!isProfessor) {
+      return res.status(400).json({ erro: "O usuário não tem a role PROFESSOR" });
+    }
+
+    const turma = await prisma.turma.findUnique({
+      where: { id: turmaId }
+    });
+
+    if (!turma) {
+      return res.status(404).json({ erro: "Turma não encontrada" });
+    }
+
+    const professorTurma = await prisma.professorTurma.findFirst({
+      where: {
+        usuarioId: professorId,
+        turmaId: turmaId
+      }
+    });
+
+    if (!professorTurma) {
+      return res.status(404).json({ 
+        erro: "Vínculo não encontrado", 
+        detalhes: "O professor não está vinculado a esta turma" 
+      });
+    }
+
+    await prisma.professorTurma.delete({
+      where: {
+        id: professorTurma.id
+      }
+    });
+
+    return res.status(200).json({ 
+      mensagem: "Professor desvinculado da turma com sucesso",
+      professor: {
+        id: usuario.id,
+        nome: usuario.nome
+      },
+      turma: {
+        id: turma.id,
+        nome: turma.nome
+      }
+    });
+
+  } catch (error) {
+    console.error("Erro ao desvincular professor da turma:", error);
+    return res.status(500).json({ 
+      erro: "Erro ao desvincular professor da turma", 
+      detalhes: error instanceof Error ? error.message : "Erro desconhecido" 
+    });
+  }
+});
+
 export default router
