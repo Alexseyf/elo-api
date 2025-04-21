@@ -6,7 +6,7 @@ import { checkRoles } from "../middlewares/checkRoles"
 const prisma = new PrismaClient()
 const router = Router()
 
-router.get("/:professorId/turmas",  async (req, res) => {
+router.get("/:professorId/turmas", async (req, res) => {
   try {
     const usuario = await prisma.usuario.findUnique({
       where: { id: parseInt(req.params.professorId) },
