@@ -36,7 +36,7 @@ async function enviarEmailSenhaPadrao(email: string, nome: string, senhaPadrao: 
   const mailOptions = {
     from: "seu-email@exemplo.com",
     to: email,
-    subject: "Bem-vindo(a) ao Sistema Escolar - Sua senha de acesso",
+    subject: "Bem-vindo(a) ao ELO - Sua senha de acesso",
     text: `Olá ${nome},
     
 Bem-vindo(a) ao Elo, seu app escolar!
@@ -48,7 +48,7 @@ Senha: ${senhaPadrao}
 Importante: Ao fazer login, você será solicitado a alterar esta senha. Por motivos de segurança, escolha uma senha forte e diferente da senha temporária.
 
 Atenciosamente,
-Equipe do Sistema Escolar`,
+Equipe ELO`,
     html: `<h2>Olá ${nome},</h2>
     <p>Bem-vindo(a) ao Sistema Escolar!</p>
     <p>Sua conta foi criada com sucesso. Para o seu primeiro acesso, utilize a senha temporária abaixo:</p>
@@ -63,7 +63,7 @@ Equipe do Sistema Escolar`,
       <li>1 caractere especial (ex: @, #, $, etc.)</li>
     </ul>
     <br>
-    <p>Atenciosamente,<br>Equipe do Sistema Escolar</p>`
+    <p>Atenciosamente,<br>Equipe ELO</p>`
   };
 
   await transporter.sendMail(mailOptions);
