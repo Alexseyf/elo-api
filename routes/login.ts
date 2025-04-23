@@ -42,17 +42,15 @@ router.post("/", async (req, res) => {
         { expiresIn: "1h" },
       )
 
-      // Verificar se é o primeiro acesso do usuário
       const primeiroAcesso = !usuario.senhaAlterada
       
-      // Incluir status de primeiro acesso na resposta
       const resposta = {
         id: usuario.id,
         nome: usuario.nome,
         email: usuario.email,
         roles: roles,
         token,
-        primeiroAcesso, // Flag que indica se o usuário precisa alterar a senha
+        primeiroAcesso,
       }
 
       res.status(200).json(resposta)

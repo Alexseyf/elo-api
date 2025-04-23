@@ -54,6 +54,14 @@ Equipe do Sistema Escolar`,
     <p>Sua conta foi criada com sucesso. Para o seu primeiro acesso, utilize a senha temporária abaixo:</p>
     <p><strong>Senha: ${senhaPadrao}</strong></p>
     <p><em>Importante: Ao fazer login, você será solicitado a alterar esta senha. Por motivos de segurança, escolha uma senha forte e diferente da senha temporária.</em></p>
+    <p>Ela deve ter:</p>
+    <ul>
+      <li>8 caracteres ou mais</li>
+      <li>1 letra maiúscula</li>
+      <li>1 letra minúscula</li>
+      <li>1 número</li>
+      <li>1 caractere especial (ex: @, #, $, etc.)</li>
+    </ul>
     <br>
     <p>Atenciosamente,<br>Equipe do Sistema Escolar</p>`
   };
