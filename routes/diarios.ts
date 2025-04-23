@@ -29,6 +29,11 @@ const diarioSchema = z.object({
   itensProvidencia: z.array(itemProvidenciaSchema).optional()
 })
 
+function normalizarData(dataString: string): string {
+  const data = new Date(dataString);
+  return `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`;
+}
+
 router.post("/", async (req: Request, res: Response) => {
   const valida = diarioSchema.safeParse(req.body)
   if (!valida.success) {
@@ -36,12 +41,18 @@ router.post("/", async (req: Request, res: Response) => {
   }
 
   try {
-    const diarioExistente = await prisma.diario.findFirst({
+    const dataFormatada = normalizarData(valida.data.data);
+    
+    const diariosExistentes = await prisma.diario.findMany({
       where: {
         alunoId: valida.data.alunoId,
-        data: new Date(valida.data.data)
       }
-    })
+    });
+    
+    const diarioExistente = diariosExistentes.find(diario => {
+      const dataDiario = normalizarData(diario.data.toISOString());
+      return dataDiario === dataFormatada;
+    });
 
     if (diarioExistente) {
       return res.status(400).json({ erro: "Já existe um diário para este aluno nesta data" })
@@ -72,10 +83,12 @@ router.post("/", async (req: Request, res: Response) => {
       itensProvidenciaIds = itensEncontrados;
     }
 
+    const dataParaSalvar = new Date(`${dataFormatada}T12:00:00.000Z`);
+    
     const diario = await prisma.diario.create({
       data: {
         ...diarioData,
-        data: new Date(diarioData.data),
+        data: dataParaSalvar,
         periodosSono: periodosSono ? {
           create: periodosSono.map(periodo => ({
             horaDormiu: periodo.horaDormiu,
