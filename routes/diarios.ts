@@ -1,6 +1,7 @@
 import { PrismaClient, DISPOSICAO, EVACUACAO, REFEICAO, TIPO_USUARIO, ITEM_PROVIDENCIA } from "@prisma/client"
 import { Router, Request, Response } from "express"
 import { z } from 'zod'
+import normalizarData from "../utils/normalizaData"
 import { checkToken } from '../middlewares/checkToken'
 import { checkRoles } from "../middlewares/checkRoles"
 
@@ -28,11 +29,6 @@ const diarioSchema = z.object({
   periodosSono: z.array(periodoSonoSchema).optional(),
   itensProvidencia: z.array(itemProvidenciaSchema).optional()
 })
-
-function normalizarData(dataString: string): string {
-  const data = new Date(dataString);
-  return `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`;
-}
 
 router.post("/", async (req: Request, res: Response) => {
   const valida = diarioSchema.safeParse(req.body)

@@ -3,6 +3,7 @@ import { Router } from "express"
 import { z } from 'zod'
 import { checkToken } from '../middlewares/checkToken'
 import { checkRoles } from "../middlewares/checkRoles"
+import normalizarData from "../utils/normalizaData"
 
 const prisma = new PrismaClient()
 const router = Router()
@@ -93,6 +94,49 @@ router.post("/:usuarioId/responsavel", async (req, res) => {
     res.status(201).json(responsavelAluno)
   } catch (error) {
     res.status(400).json(error)
+  }
+})
+
+router.get("/:alunoId/possui-registro-diario", async (req, res) => {
+  try {
+    const alunoId = parseInt(req.params.alunoId)
+    
+    if (isNaN(alunoId)) {
+      return res.status(400).json({ erro: "ID de aluno inválido" })
+    }
+    
+    const aluno = await prisma.aluno.findUnique({
+      where: { id: alunoId }
+    })
+
+    if (!aluno) {
+      return res.status(404).json({ erro: "Aluno não encontrado" })
+    }
+
+    const dataConsulta = req.query.data ? req.query.data.toString() : new Date().toISOString()
+    const dataFormatada = normalizarData(dataConsulta)
+    const dataInicio = new Date(`${dataFormatada}T00:00:00.000Z`)
+    const dataFim = new Date(`${dataFormatada}T23:59:59.999Z`)
+    
+    const diario = await prisma.diario.findFirst({
+      where: { 
+        alunoId,
+        data: {
+          gte: dataInicio,
+          lte: dataFim
+        }
+      }
+    })
+
+    res.status(200).json({ 
+      alunoId, 
+      data: dataFormatada,
+      temDiario: !!diario,
+      diario: diario ? { id: diario.id } : null
+    })
+  } catch (error) {
+    console.error("Erro ao verificar diário:", error)
+    res.status(400).json({ erro: "Erro ao verificar diário", detalhes: error })
   }
 })
 
