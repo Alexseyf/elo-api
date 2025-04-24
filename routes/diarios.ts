@@ -79,7 +79,8 @@ router.post("/", async (req: Request, res: Response) => {
       itensProvidenciaIds = itensEncontrados;
     }
 
-    const dataParaSalvar = new Date(`${dataFormatada}T12:00:00.000Z`);
+    const [ano, mes, dia] = dataFormatada.split('-').map(Number);
+    const dataParaSalvar = new Date(ano, mes - 1, dia, 12, 0, 0);
     
     const diario = await prisma.diario.create({
       data: {
