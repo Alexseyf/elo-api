@@ -215,4 +215,97 @@ router.get("/:id", async (req: Request, res: Response) => {
   }
 });
 
+router.patch("/:id", checkRoles([TIPO_USUARIO.PROFESSOR, TIPO_USUARIO.ADMIN]), async (req: Request, res: Response) => {
+  const diarioId = parseInt(req.params.id);
+  
+  if (isNaN(diarioId)) {
+    return res.status(400).json({ erro: "ID de diário inválido" });
+  }
+  
+  const valida = diarioSchema.safeParse(req.body);
+  if (!valida.success) {
+    return res.status(400).json({ erro: valida.error });
+  }
+  
+  try {
+    const diarioExistente = await prisma.diario.findUnique({
+      where: { id: diarioId },
+      include: {
+        periodosSono: true,
+        itensProvidencia: {
+          include: {
+            itemProvidencia: true
+          }
+        }
+      }
+    });
+    
+    if (!diarioExistente) {
+      return res.status(404).json({ erro: "Diário não encontrado" });
+    }
+    
+    const { periodosSono, itensProvidencia, ...diarioData } = valida.data;
+    const dataFormatada = normalizarData(diarioData.data);
+    const [ano, mes, dia] = dataFormatada.split('-').map(Number);
+    const dataParaSalvar = new Date(ano, mes - 1, dia, 12, 0, 0);
+
+    let itensProvidenciaIds: { id: number }[] = [];
+    if (itensProvidencia && itensProvidencia.length > 0) {
+      const itensEncontrados = await prisma.itemProvidencia.findMany({
+        where: {
+          nome: {
+            in: itensProvidencia
+          }
+        },
+        select: {
+          id: true
+        }
+      });
+      itensProvidenciaIds = itensEncontrados;
+    }
+
+    await prisma.periodoSono.deleteMany({
+      where: { diarioId }
+    });
+    
+    await prisma.diarioItemProvidencia.deleteMany({
+      where: { diarioId }
+    });
+
+    const diarioAtualizado = await prisma.diario.update({
+      where: { id: diarioId },
+      data: {
+        ...diarioData,
+        data: dataParaSalvar,
+        periodosSono: periodosSono ? {
+          create: periodosSono.map(periodo => ({
+            horaDormiu: periodo.horaDormiu,
+            horaAcordou: periodo.horaAcordou,
+            tempoTotal: periodo.tempoTotal
+          }))
+        } : undefined,
+        itensProvidencia: itensProvidenciaIds.length > 0 ? {
+          create: itensProvidenciaIds.map(item => ({
+            itemProvidenciaId: item.id
+          }))
+        } : undefined
+      },
+      include: {
+        aluno: true,
+        periodosSono: true,
+        itensProvidencia: {
+          include: {
+            itemProvidencia: true
+          }
+        }
+      }
+    });
+    
+    res.status(200).json(diarioAtualizado);
+  } catch (error) {
+    console.error("Erro ao atualizar diário:", error);
+    res.status(400).json({ erro: "Erro ao atualizar diário", detalhes: error });
+  }
+});
+
 export default router
