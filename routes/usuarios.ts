@@ -77,6 +77,16 @@ router.post("/", async (req, res) => {
   }
 
   try {
+    const emailExistente = await prisma.usuario.findUnique({
+      where: { email: valida.data.email }
+    })
+
+    if (emailExistente) {
+      return res.status(409).json({ 
+        erro: "Email já cadastrado no sistema. Por favor, utilize outro email." 
+      })
+    }
+
     const senhaParaUsar = valida.data.senha || generateDefaultPassword(valida.data.email)
     
     const erros = passwordCheck(senhaParaUsar)
@@ -112,17 +122,23 @@ router.post("/", async (req, res) => {
     
     if (!valida.data.senha) {
       await enviarEmailSenhaPadrao(usuario.email, usuario.nome, senhaParaUsar);
-      
-      res.status(201).json({ 
+        res.status(201).json({ 
         ...usuarioSemSenha, 
         mensagem: "Usuário criado com sucesso. Uma senha temporária foi enviada para o email cadastrado." 
       });
     } else {
       res.status(201).json(usuarioSemSenha);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao criar usuário:", error);
-    res.status(400).json(error)
+
+    if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
+      return res.status(409).json({ 
+        erro: "Email já cadastrado no sistema. Por favor, utilize outro email." 
+      });
+    }
+    
+    res.status(400).json(error);
   }
 })
 
