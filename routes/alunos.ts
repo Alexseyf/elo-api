@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient, TIPO_USUARIO } from "@prisma/client"
 import { Router } from "express"
 import { z } from 'zod'
 import { checkToken } from '../middlewares/checkToken'
@@ -137,6 +137,32 @@ router.get("/:alunoId/possui-registro-diario", async (req, res) => {
   } catch (error) {
     console.error("Erro ao verificar diário:", error)
     res.status(400).json({ erro: "Erro ao verificar diário", detalhes: error })
+  }
+})
+
+router.get("/ativos", checkToken, checkRoles([TIPO_USUARIO.ADMIN]), async (req, res) => {
+  try {
+    const alunosAtivos = await prisma.aluno.findMany({
+      where: {
+        isAtivo: true
+      },
+      include: {
+        turma: true,
+        responsaveis: {
+          include: {
+            usuario: true
+          }
+        }
+      },
+      orderBy: {
+        nome: 'asc'
+      }
+    })
+    
+    res.status(200).json(alunosAtivos)
+  } catch (error) {
+    console.error("Erro ao buscar alunos ativos:", error)
+    res.status(500).json({ erro: "Erro ao buscar alunos ativos" })
   }
 })
 
