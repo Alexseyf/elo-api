@@ -32,7 +32,6 @@ const eventoPatchSchema = z.object({
   criadorId: z.number().int().positive().optional()
 })
 
-// Rota para cadastrar um novo evento
 router.post("/", checkToken, checkRoles(["ADMIN", "PROFESSOR"]), async (req: Request, res: Response) => {
   const valida = eventoSchema.safeParse(req.body)
   if (!valida.success) {

@@ -166,4 +166,48 @@ router.get("/ativos", checkToken, checkRoles([TIPO_USUARIO.ADMIN]), async (req, 
   }
 })
 
+router.get("/:id", checkToken, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id)
+    
+    if (isNaN(id)) {
+      return res.status(400).json({ erro: "ID de aluno inválido" })
+    }
+    
+    const aluno = await prisma.aluno.findUnique({
+      where: { id },
+      include: {
+        turma: true,
+        responsaveis: {
+          include: {
+            usuario: true
+          }
+        },
+        diario: {
+          orderBy: {
+            data: 'desc'
+          },
+          include: {
+            periodosSono: true,
+            itensProvidencia: {
+              include: {
+                itemProvidencia: true
+              }
+            }
+          }
+        }
+      }
+    })
+
+    if (!aluno) {
+      return res.status(404).json({ erro: "Aluno não encontrado" })
+    }
+
+    res.status(200).json(aluno)
+  } catch (error) {
+    console.error("Erro ao buscar informações do aluno:", error)
+    res.status(500).json({ erro: "Erro ao buscar informações do aluno", detalhes: error })
+  }
+})
+
 export default router
