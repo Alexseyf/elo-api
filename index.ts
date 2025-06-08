@@ -6,6 +6,8 @@ import alunosRouter from './routes/alunos'
 import professoresRouter from './routes/professores'
 import responsaveisRouter from './routes/responsaveis'
 import diariosRouter from './routes/diarios'
+import cronogramasRouter from './routes/cronogramas'
+import eventosRouter from './routes/eventos'
 import routesLogin from './routes/login'
 import routesRecuperaSenha from './routes/recuperaSenha'
 import routesValidaSenha from './routes/validaSenha'
@@ -42,6 +44,8 @@ app.use('/alunos', alunosRouter)
 app.use('/professores', professoresRouter)
 app.use('/responsaveis', responsaveisRouter)
 app.use('/diarios', diariosRouter)
+app.use('/cronogramas', cronogramasRouter)
+app.use('/eventos', eventosRouter)
 app.use("/login", routesLogin)
 app.use("/recupera-senha", routesRecuperaSenha)
 app.use("/valida-senha", routesValidaSenha)

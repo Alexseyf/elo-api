@@ -19,11 +19,12 @@ model Usuario {
   resetToken        String?
   resetTokenExpires DateTime?
   senhaAlterada     Boolean                 @default(false)
-
   roles             UsuarioRole[]
   turmasLecionadas  ProfessorTurma[]        
   alunosResponsavel ResponsavelAluno[]      
   logs              Log[]                  
+  cronogramas       Cronograma[]
+  eventos           Evento[]
 
   @@map("usuarios")
 }
@@ -42,7 +43,6 @@ model UsuarioRole {
   roleId    Int
   usuario   Usuario  @relation(fields: [usuarioId], references: [id])
   role      Role     @relation(fields: [roleId], references: [id])
-
   @@unique([usuarioId, roleId])
   @@map("usuario_roles")
 }
@@ -51,7 +51,8 @@ model Turma {
   id          Int               @id @default(autoincrement())
   nome        TURMA             @unique
   alunos      Aluno[]
-  professores ProfessorTurma[]  
+  professores ProfessorTurma[]
+  eventos     Evento[]
 
   @@map("turmas")
 }
@@ -205,4 +206,49 @@ enum EVACUACAO {
   LIQUIDA
   DURA
   NAO_EVACUOU
+}
+
+enum TIPO_EVENTO {
+  REUNIAO
+  FERIADO
+  RECESSO
+  EVENTO_ESCOLAR
+  ATIVIDADE_PEDAGOGICA
+  OUTRO
+}
+
+model Cronograma {
+  id          Int           @id @default(autoincrement())
+  titulo      String        @db.VarChar(100)
+  descricao   String        @db.VarChar(500)
+  data        DateTime      @db.Date
+  horaInicio  String        @db.VarChar(5)    // Formato "HH:MM"
+  horaFim     String        @db.VarChar(5)    // Formato "HH:MM"
+  tipoEvento  TIPO_EVENTO
+  isAtivo     Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  criador     Usuario       @relation(fields: [criadorId], references: [id])
+  criadorId   Int
+
+  @@map("cronogramas")
+}
+
+model Evento {
+  id          Int           @id @default(autoincrement())
+  titulo      String        @db.VarChar(100)
+  descricao   String        @db.VarChar(500)
+  data        DateTime      @db.Date
+  horaInicio  String        @db.VarChar(5)    // Formato "HH:MM"
+  horaFim     String        @db.VarChar(5)    // Formato "HH:MM"
+  tipoEvento  TIPO_EVENTO
+  isAtivo     Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  turma       Turma         @relation(fields: [turmaId], references: [id])
+  turmaId     Int
+  criador     Usuario       @relation(fields: [criadorId], references: [id])
+  criadorId   Int
+
+  @@map("eventos")
 }
