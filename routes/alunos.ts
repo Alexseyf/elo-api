@@ -210,4 +210,65 @@ router.get("/:id", checkToken, async (req, res) => {
   }
 })
 
+router.delete("/:alunoId/responsavel/:usuarioId", checkToken, checkRoles([TIPO_USUARIO.ADMIN]), async (req, res) => {
+  try {
+    const alunoId = parseInt(req.params.alunoId)
+    const usuarioId = parseInt(req.params.usuarioId)
+    
+    if (isNaN(alunoId) || isNaN(usuarioId)) {
+      return res.status(400).json({ erro: "IDs inválidos" })
+    }
+
+    const aluno = await prisma.aluno.findUnique({
+      where: { id: alunoId }
+    })
+
+    if (!aluno) {
+      return res.status(404).json({ erro: "Aluno não encontrado" })
+    }
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: usuarioId },
+      include: {
+        roles: {
+          include: {
+            role: true
+          }
+        }
+      }
+    })
+
+    if (!usuario) {
+      return res.status(404).json({ erro: "Usuário não encontrado" })
+    }
+
+    const isResponsavel = usuario.roles.some(ur => ur.role.tipo === "RESPONSAVEL")
+    if (!isResponsavel) {
+      return res.status(400).json({ erro: "O usuário não é um responsável" })
+    }
+
+    const relacaoExistente = await prisma.responsavelAluno.findFirst({
+      where: {
+        alunoId,
+        usuarioId
+      }
+    })
+
+    if (!relacaoExistente) {
+      return res.status(404).json({ erro: "Relação responsável-aluno não encontrada" })
+    }
+
+    await prisma.responsavelAluno.delete({
+      where: {
+        id: relacaoExistente.id
+      }
+    })
+    
+    res.status(200).json({ mensagem: "Responsável removido com sucesso" })
+  } catch (error) {
+    console.error("Erro ao remover responsável do aluno:", error)
+    res.status(500).json({ erro: "Erro ao remover responsável do aluno", detalhes: error })
+  }
+})
+
 export default router
