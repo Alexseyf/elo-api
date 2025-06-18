@@ -53,10 +53,28 @@ async function enviarEmail(email: string, nome: string, code: string) {
   });
 
   const mailOptions = {
-    from: "your-email@example.com",
+    from: "seu-email@exemplo.com",
     to: email,
-    subject: "Recuperação de senha",
-    text: `${nome}, seu código de verificação é: ${code}`,
+    subject: "ELO - Recuperação de senha",
+    text: `Olá ${nome},
+    
+Você solicitou a recuperação de senha para sua conta no ELO.
+
+Seu código de verificação é:
+
+Código: ${code}
+
+Este código é válido por 5 minutos. Se você não solicitou a recuperação de senha, por favor, ignore este email.
+
+Atenciosamente,
+Equipe ELO`,
+    html: `<h2>Olá ${nome},</h2>
+    <p>Você solicitou a recuperação de senha para sua conta no ELO.</p>
+    <p>Seu código de verificação é:</p>
+    <p><strong>Código: ${code}</strong></p>
+    <p><em>Este código é válido por 5 minutos. Se você não solicitou a recuperação de senha, por favor, ignore este email.</em></p>
+    <br>
+    <p>Atenciosamente,<br>Equipe ELO</p>`
   };
 
   await transporter.sendMail(mailOptions);
