@@ -12,8 +12,6 @@ const cronogramaSchema = z.object({
   titulo: z.string().max(100),
   descricao: z.string().max(500),
   data: z.string().datetime(),
-  horaInicio: z.string().regex(/^\d{2}:\d{2}$/, "Formato deve ser HH:MM"),
-  horaFim: z.string().regex(/^\d{2}:\d{2}$/, "Formato deve ser HH:MM"),
   tipoEvento: z.nativeEnum(TIPO_EVENTO),
   isAtivo: z.boolean().default(true),
   criadorId: z.number().int().positive()
@@ -23,15 +21,13 @@ const cronogramaPatchSchema = z.object({
   titulo: z.string().max(100).optional(),
   descricao: z.string().max(500).optional(),
   data: z.string().datetime().optional(),
-  horaInicio: z.string().regex(/^\d{2}:\d{2}$/, "Formato deve ser HH:MM").optional(),
-  horaFim: z.string().regex(/^\d{2}:\d{2}$/, "Formato deve ser HH:MM").optional(),
   tipoEvento: z.nativeEnum(TIPO_EVENTO).optional(),
   isAtivo: z.boolean().optional(),
   criadorId: z.number().int().positive().optional()
 })
 
 // Rota para cadastrar um novo evento/cronograma
-router.post("/", checkToken, checkRoles(["ADMIN", "PROFESSOR"]), async (req: Request, res: Response) => {
+router.post("/", checkToken, checkRoles(["ADMIN"]), async (req: Request, res: Response) => {
   const valida = cronogramaSchema.safeParse(req.body)
   if (!valida.success) {
     return res.status(400).json({ erro: valida.error })
@@ -42,8 +38,12 @@ router.post("/", checkToken, checkRoles(["ADMIN", "PROFESSOR"]), async (req: Req
 
     const cronograma = await prisma.cronograma.create({
       data: {
-        ...valida.data,
-        data: new Date(dataFormatada)
+        titulo: valida.data.titulo,
+        descricao: valida.data.descricao,
+        data: new Date(dataFormatada),
+        tipoEvento: valida.data.tipoEvento,
+        isAtivo: valida.data.isAtivo,
+        criadorId: valida.data.criadorId
       }
     })
 
@@ -148,8 +148,12 @@ router.put("/:id", checkToken, checkRoles(["ADMIN", "PROFESSOR"]), async (req: R
     const cronograma = await prisma.cronograma.update({
       where: { id },
       data: {
-        ...valida.data,
-        data: new Date(dataFormatada)
+        titulo: valida.data.titulo,
+        descricao: valida.data.descricao,
+        data: new Date(dataFormatada),
+        tipoEvento: valida.data.tipoEvento,
+        isAtivo: valida.data.isAtivo,
+        criadorId: valida.data.criadorId
       }
     })
 

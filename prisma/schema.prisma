@@ -222,8 +222,6 @@ model Cronograma {
   titulo      String        @db.VarChar(100)
   descricao   String        @db.VarChar(500)
   data        DateTime      @db.Date
-  horaInicio  String        @db.VarChar(5)    // Formato "HH:MM"
-  horaFim     String        @db.VarChar(5)    // Formato "HH:MM"
   tipoEvento  TIPO_EVENTO
   isAtivo     Boolean       @default(true)
   createdAt   DateTime      @default(now())
