@@ -12,7 +12,16 @@ const alunoSchema = z.object({
   nome: z.string().min(3).max(60),
   dataNasc: z.string().datetime(),
   turmaId: z.number().int().positive(),
-  isAtivo: z.boolean().optional()
+  isAtivo: z.boolean().optional(),
+  mensalidade: z.number().positive().optional()
+})
+
+const alunoPatchSchema = z.object({
+  nome: z.string().min(3).max(60).optional(),
+  dataNasc: z.string().datetime().optional(),
+  turmaId: z.number().int().positive().optional(),
+  isAtivo: z.boolean().optional(),
+  mensalidade: z.number().positive().optional()
 })
 
 router.post("/", async (req, res) => {
@@ -268,6 +277,81 @@ router.delete("/:alunoId/responsavel/:usuarioId", checkToken, checkRoles([TIPO_U
   } catch (error) {
     console.error("Erro ao remover responsável do aluno:", error)
     res.status(500).json({ erro: "Erro ao remover responsável do aluno", detalhes: error })
+  }
+})
+
+router.put("/:id", checkToken, checkRoles([TIPO_USUARIO.ADMIN]), async (req, res) => {
+  const valida = alunoSchema.safeParse(req.body)
+  if (!valida.success) {
+    return res.status(400).json({ erro: valida.error })
+  }
+
+  try {
+    const id = parseInt(req.params.id)
+    
+    if (isNaN(id)) {
+      return res.status(400).json({ erro: "ID de aluno inválido" })
+    }
+
+    const alunoExistente = await prisma.aluno.findUnique({
+      where: { id }
+    })
+
+    if (!alunoExistente) {
+      return res.status(404).json({ erro: "Aluno não encontrado" })
+    }
+
+    const aluno = await prisma.aluno.update({
+      where: { id },
+      data: {
+        ...valida.data,
+        dataNasc: new Date(valida.data.dataNasc)
+      }
+    })
+
+    return res.status(200).json(aluno)
+  } catch (error) {
+    console.error("Erro ao atualizar aluno:", error)
+    return res.status(500).json({ erro: "Erro ao atualizar aluno", detalhes: error })
+  }
+})
+
+router.patch("/:id", checkToken, checkRoles([TIPO_USUARIO.ADMIN]), async (req, res) => {
+  const valida = alunoPatchSchema.safeParse(req.body)
+  if (!valida.success) {
+    return res.status(400).json({ erro: valida.error })
+  }
+
+  try {
+    const id = parseInt(req.params.id)
+    
+    if (isNaN(id)) {
+      return res.status(400).json({ erro: "ID de aluno inválido" })
+    }
+
+    const alunoExistente = await prisma.aluno.findUnique({
+      where: { id }
+    })
+
+    if (!alunoExistente) {
+      return res.status(404).json({ erro: "Aluno não encontrado" })
+    }
+
+    let dadosAtualizacao: any = { ...valida.data }
+
+    if (valida.data.dataNasc) {
+      dadosAtualizacao.dataNasc = new Date(valida.data.dataNasc)
+    }
+
+    const aluno = await prisma.aluno.update({
+      where: { id },
+      data: dadosAtualizacao
+    })
+
+    return res.status(200).json(aluno)
+  } catch (error) {
+    console.error("Erro ao atualizar aluno parcialmente:", error)
+    return res.status(500).json({ erro: "Erro ao atualizar aluno", detalhes: error })
   }
 })
 

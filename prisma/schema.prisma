@@ -82,6 +82,7 @@ model Aluno {
   nome         String             @db.VarChar(60)
   dataNasc     DateTime
   isAtivo      Boolean            @default(true)
+  mensalidade  Float?             
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
   turma        Turma              @relation(fields: [turmaId], references: [id])

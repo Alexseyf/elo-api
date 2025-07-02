@@ -127,7 +127,7 @@ router.get("/:id", checkToken, async (req: Request, res: Response) => {
 })
 
 // Rota para atualizar um cronograma
-router.put("/:id", checkToken, checkRoles(["ADMIN", "PROFESSOR"]), async (req: Request, res: Response) => {
+router.put("/:id", checkToken, checkRoles(["ADMIN"]), async (req: Request, res: Response) => {
   const valida = cronogramaSchema.safeParse(req.body)
   if (!valida.success) {
     return res.status(400).json({ erro: valida.error })
@@ -202,7 +202,7 @@ router.patch("/:id", checkToken, checkRoles(["ADMIN", "PROFESSOR"]), async (req:
 })
 
 // Rota para desativar um evento/cronograma
-router.delete("/:id", checkToken, checkRoles(["ADMIN", "PROFESSOR"]), async (req: Request, res: Response) => {
+router.delete("/:id", checkToken, checkRoles(["ADMIN"]), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id)
 
