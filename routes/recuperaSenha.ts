@@ -44,8 +44,9 @@ router.post("/", async (req, res) => {
 
 async function enviarEmail(email: string, nome: string, code: string) {
   const transporter = nodemailer.createTransport({
-    host: "sandbox.smtp.mailtrap.io",
-    port: 587,
+    host: process.env.EMAIL_HOST || "smtp.gmail.com",
+    port: Number(process.env.EMAIL_PORT) || 587,
+    secure: process.env.EMAIL_SECURE === 'true',
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
@@ -53,7 +54,7 @@ async function enviarEmail(email: string, nome: string, code: string) {
   });
 
   const mailOptions = {
-    from: "seu-email@exemplo.com",
+    from: process.env.EMAIL_FROM || "noreply@eloapp.com",
     to: email,
     subject: "ELO - Recuperação de senha",
     text: `Olá ${nome},

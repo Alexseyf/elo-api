@@ -25,8 +25,9 @@ const usuarioSchema = z.object({
 
 async function enviarEmailSenhaPadrao(email: string, nome: string, senhaPadrao: string) {
   const transporter = nodemailer.createTransport({
-    host: "sandbox.smtp.mailtrap.io",
-    port: 587,
+    host: process.env.EMAIL_HOST || "smtp.gmail.com",
+    port: Number(process.env.EMAIL_PORT) || 587,
+    secure: process.env.EMAIL_SECURE === 'true',
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
@@ -34,7 +35,7 @@ async function enviarEmailSenhaPadrao(email: string, nome: string, senhaPadrao: 
   });
 
   const mailOptions = {
-    from: "seu-email@exemplo.com",
+    from: process.env.EMAIL_FROM || "noreply@eloapp.com",
     to: email,
     subject: "Bem-vindo(a) ao ELO - Sua senha de acesso",
     text: `Olá ${nome},
