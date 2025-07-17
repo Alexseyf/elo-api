@@ -355,4 +355,37 @@ router.patch("/:id", checkToken, checkRoles([TIPO_USUARIO.ADMIN]), async (req, r
   }
 })
 
+router.delete("/soft/:id", checkToken, checkRoles([TIPO_USUARIO.ADMIN]), async (req, res) => {
+  try {
+    const id = parseInt(req.params.id)
+    
+    if (isNaN(id)) {
+      return res.status(400).json({ erro: "ID de aluno inválido" })
+    }
+
+    const alunoExistente = await prisma.aluno.findUnique({
+      where: { id }
+    })
+
+    if (!alunoExistente) {
+      return res.status(404).json({ erro: "Aluno não encontrado" })
+    }
+    
+    const aluno = await prisma.aluno.update({
+      where: { id },
+      data: {
+        isAtivo: false
+      }
+    })
+
+    return res.status(200).json({ 
+      mensagem: "Aluno desativado com sucesso",
+      aluno
+    })
+  } catch (error) {
+    console.error("Erro ao desativar aluno:", error)
+    return res.status(500).json({ erro: "Erro ao desativar aluno", detalhes: error })
+  }
+})
+
 export default router
