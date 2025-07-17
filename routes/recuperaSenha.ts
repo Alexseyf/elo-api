@@ -54,9 +54,16 @@ async function enviarEmail(email: string, nome: string, code: string) {
   });
 
   const mailOptions = {
-    from: process.env.EMAIL_FROM || "noreply@eloapp.com",
+    from: `"ELO App" <${process.env.EMAIL_FROM || "noreply@eloapp.com"}>`,
     to: email,
     subject: "ELO - Recuperação de senha",
+    priority: "high" as const,
+    headers: {
+      'X-Priority': '1',
+      'Importance': 'high',
+      'X-MSMail-Priority': 'High',
+      'X-Mailer': 'ELO App System Mailer'
+    },
     text: `Olá ${nome},
     
 Você solicitou a recuperação de senha para sua conta no ELO.

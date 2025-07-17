@@ -35,9 +35,16 @@ async function enviarEmailSenhaPadrao(email: string, nome: string, senhaPadrao: 
   });
 
   const mailOptions = {
-    from: process.env.EMAIL_FROM || "noreply@eloapp.com",
+    from: `"ELO App" <${process.env.EMAIL_FROM || "noreply@eloapp.com"}>`,
     to: email,
     subject: "Bem-vindo(a) ao ELO - Sua senha de acesso",
+    priority: "high" as const,
+    headers: {
+      'X-Priority': '1',
+      'Importance': 'high',
+      'X-MSMail-Priority': 'High',
+      'X-Mailer': 'ELO App System Mailer'
+    },
     text: `Olá ${nome},
     
 Bem-vindo(a) ao Elo, seu app escolar!
