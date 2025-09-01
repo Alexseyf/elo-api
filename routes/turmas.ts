@@ -115,4 +115,32 @@ router.get("/:turmaId/alunos", async (req, res) => {
   }
 })
 
+router.get("/totalAlunosTurma", async (req, res) => {
+  try {
+    const turmasComTotalAlunos = await prisma.turma.findMany({
+      include: {
+        _count: {
+          select: {
+            alunos: {
+              where: {
+                isAtivo: true
+              }
+            }
+          }
+        }
+      }
+    })
+
+    const resultado = turmasComTotalAlunos.map(turma => ({
+      id: turma.id,
+      nome: turma.nome,
+      totalAlunosAtivos: turma._count.alunos
+    }))
+
+    res.status(200).json(resultado)
+  } catch (error) {
+    res.status(400).json(error)
+  }
+})
+
 export default router
