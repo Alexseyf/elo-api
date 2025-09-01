@@ -173,6 +173,30 @@ router.get("/", async (req, res) => {
   }
 })
 
+router.get("/ativos", async (req, res) => {
+  try {
+    const usuarios = await prisma.usuario.findMany({
+      where: { isAtivo: true },
+      include: {
+        roles: {
+          include: {
+            role: true
+          }
+        }
+      }
+    })
+
+    const usuariosComRoles = usuarios.map(usuario => ({
+      ...usuario,
+      roles: usuario.roles.map(ur => ur.role.tipo)
+    }))
+
+    res.status(200).json(usuariosComRoles)
+  } catch (error) {
+    res.status(400).json(error)
+  }
+})
+
 router.get("/usuario-logado", checkToken, async (req: Request | any, res) => {
   try {
     const userId = req.userLogadoId;
