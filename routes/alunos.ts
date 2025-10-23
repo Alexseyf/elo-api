@@ -24,7 +24,7 @@ const alunoPatchSchema = z.object({
   mensalidade: z.number().positive().optional()
 })
 
-router.post("/", async (req, res) => {
+router.post("/", checkToken, checkRoles([TIPO_USUARIO.ADMIN]), async (req, res) => {
   const valida = alunoSchema.safeParse(req.body)
   if (!valida.success) {
     res.status(400).json({ erro: valida.error })
