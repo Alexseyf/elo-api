@@ -11,7 +11,7 @@ const turmaSchema = z.object({
   nome: z.nativeEnum(TURMA)
 })
 
-router.post("/", async (req, res) => {
+router.post("/", checkToken, checkRoles(["ADMIN"]), async (req, res) => {
   const valida = turmaSchema.safeParse(req.body)
   if (!valida.success) {
     res.status(400).json({ erro: valida.error })
