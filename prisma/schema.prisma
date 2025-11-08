@@ -233,6 +233,13 @@ enum CAMPO_EXPERIENCIA {
   ESPACOS_TEMPOS_QUANTIDADES_RELACOES_TRANSFORMACOES
 }
 
+model CamposDeExperiencia {
+  id               Int                  @id @default(autoincrement())
+  campoExperiencia CAMPO_EXPERIENCIA    @unique
+
+  @@map("campo_de_experiencia")
+}
+
 model Cronograma {
   id          Int           @id @default(autoincrement())
   titulo      String        @db.VarChar(100)
