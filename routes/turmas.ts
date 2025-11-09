@@ -1,4 +1,4 @@
-import { PrismaClient, TURMA } from "@prisma/client"
+import { PrismaClient, TURMA, GRUPO_POR_CAMPO } from "@prisma/client"
 import { Router } from "express"
 import { z } from 'zod'
 import { checkToken } from '../middlewares/checkToken'
@@ -6,6 +6,21 @@ import { checkRoles } from "../middlewares/checkRoles"
 
 const prisma = new PrismaClient()
 const router = Router()
+
+const getTurmaGrupo = (turma: TURMA): GRUPO_POR_CAMPO => {
+  switch (turma) {
+    case "BERCARIO2":
+      return "BEBES";
+    case "MATERNAL1":
+    case "MATERNAL2":
+      return "CRIANCAS_BEM_PEQUENAS";
+    case "PRE1":
+    case "PRE2":
+      return "CRIANCAS_PEQUENAS";
+    case "TURNOINVERSO":
+      return "CRIANCAS_MAIORES";
+  }
+}
 
 const turmaSchema = z.object({
   nome: z.nativeEnum(TURMA)
@@ -20,7 +35,10 @@ router.post("/", checkToken, checkRoles(["ADMIN"]), async (req, res) => {
 
   try {
     const turma = await prisma.turma.create({
-      data: valida.data
+      data: {
+        nome: valida.data.nome,
+        grupo: getTurmaGrupo(valida.data.nome)
+      }
     })
     res.status(201).json(turma)
   } catch (error) {

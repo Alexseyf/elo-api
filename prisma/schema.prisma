@@ -51,6 +51,7 @@ model UsuarioRole {
 model Turma {
   id          Int               @id @default(autoincrement())
   nome        TURMA             @unique
+  grupo       GRUPO_POR_CAMPO
   alunos      Aluno[]
   professores ProfessorTurma[]
   eventos     Evento[]
@@ -278,11 +279,18 @@ model Objetivo {
   id             Int                @id @default(autoincrement())
   codigo         String             @db.VarChar(10) @unique
   descricao      String             @db.VarChar(500)
-  grupo          String             @db.VarChar(30)  // "Bebês", "Crianças bem pequenas", "Crianças pequenas"
+  grupo          GRUPO_POR_CAMPO
   campoExperiencia CAMPO_EXPERIENCIA
   atividades     Atividade[]
 
   @@map("objetivos")
+}
+
+enum GRUPO_POR_CAMPO {
+  BEBES
+  CRIANCAS_BEM_PEQUENAS
+  CRIANCAS_PEQUENAS
+  CRIANCAS_MAIORES
 }
 
 model Atividade {
