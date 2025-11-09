@@ -11,7 +11,7 @@ const campoSchema = z.object({
   campoExperiencia: z.nativeEnum(CAMPO_EXPERIENCIA)
 })
 
-router.post("/campos", checkToken, checkRoles(["ADMIN"]), async (req, res) => {
+router.post("/", checkToken, checkRoles(["ADMIN"]), async (req, res) => {
     const valida = campoSchema.safeParse(req.body);
     if (!valida.success) {
         res.status(400).json({ erro: valida.error });
@@ -28,7 +28,7 @@ router.post("/campos", checkToken, checkRoles(["ADMIN"]), async (req, res) => {
   }
 })
 
-router.get("/campos", checkToken, async (req, res) => {
+router.get("/", checkToken, async (req, res) => {
     try {
         const campos = await prisma.camposDeExperiencia.findMany({
             orderBy: {
