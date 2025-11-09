@@ -39,7 +39,7 @@ router.post("/", async (req, res) => {
           roles: roles,
         },
         process.env.JWT_KEY as string,
-        { expiresIn: "1h" },
+        { expiresIn: "30d" },
       )
 
       const primeiroAcesso = !usuario.senhaAlterada

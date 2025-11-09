@@ -11,6 +11,7 @@ import eventosRouter from './routes/eventos'
 import routesLogin from './routes/login'
 import routesRecuperaSenha from './routes/recuperaSenha'
 import routesValidaSenha from './routes/validaSenha'
+import campos from './routes/campos'
 import cors from 'cors'
 import swaggerUi from 'swagger-ui-express'
 import swaggerDocs from './swagger.json'
@@ -50,6 +51,7 @@ app.use("/login", routesLogin)
 app.use("/recupera-senha", routesRecuperaSenha)
 app.use("/valida-senha", routesValidaSenha)
 app.use("/", routesValidaSenha)
+app.use("/campos", campos)
 
 app.get('/', (req, res) => {
   res.send('API - Escola Educação Infantil')
