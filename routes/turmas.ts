@@ -7,19 +7,31 @@ import { checkRoles } from "../middlewares/checkRoles"
 const prisma = new PrismaClient()
 const router = Router()
 
-const getTurmaGrupo = (turma: TURMA): GRUPO_POR_CAMPO => {
-  switch (turma) {
-    case "BERCARIO2":
-      return "BEBES";
-    case "MATERNAL1":
-    case "MATERNAL2":
-      return "CRIANCAS_BEM_PEQUENAS";
-    case "PRE1":
-    case "PRE2":
-      return "CRIANCAS_PEQUENAS";
-    case "TURNOINVERSO":
-      return "CRIANCAS_MAIORES";
+const getTurmaGrupo = async (turma: TURMA): Promise<number> => {
+  const grupoNome = (() => {
+    switch (turma) {
+      case "BERCARIO2":
+        return "BEBES";
+      case "MATERNAL1":
+      case "MATERNAL2":
+        return "CRIANCAS_BEM_PEQUENAS";
+      case "PRE1":
+      case "PRE2":
+        return "CRIANCAS_PEQUENAS";
+      case "TURNOINVERSO":
+        return "CRIANCAS_MAIORES";
+    }
+  })() as GRUPO_POR_CAMPO;
+
+  const grupo = await prisma.grupoPorCampo.findUnique({
+    where: { nome: grupoNome }
+  });
+
+  if (!grupo) {
+    throw new Error(`Grupo ${grupoNome} não encontrado`);
   }
+
+  return grupo.id;
 }
 
 const turmaSchema = z.object({
@@ -34,10 +46,11 @@ router.post("/", checkToken, checkRoles(["ADMIN"]), async (req, res) => {
   }
 
   try {
+    const grupoId = await getTurmaGrupo(valida.data.nome);
     const turma = await prisma.turma.create({
       data: {
         nome: valida.data.nome,
-        grupo: getTurmaGrupo(valida.data.nome)
+        grupoId: grupoId
       }
     })
     res.status(201).json(turma)

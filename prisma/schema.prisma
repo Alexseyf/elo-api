@@ -8,21 +8,21 @@ datasource db {
 }
 
 model Usuario {
-  id                Int                     @id @default(autoincrement())
-  nome              String                  @db.VarChar(60)
-  email             String                  @db.VarChar(40) @unique
-  senha             String                  @db.VarChar(60)
-  telefone          String                  @db.VarChar(20)
-  isAtivo           Boolean                 @default(true)
-  createdAt         DateTime                @default(now())
-  updatedAt         DateTime                @updatedAt
+  id                Int                @id @default(autoincrement())
+  nome              String             @db.VarChar(60)
+  email             String             @unique @db.VarChar(40)
+  senha             String             @db.VarChar(60)
+  telefone          String             @db.VarChar(20)
+  isAtivo           Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
   resetToken        String?
   resetTokenExpires DateTime?
-  senhaAlterada     Boolean                 @default(false)
+  senhaAlterada     Boolean            @default(false)
   roles             UsuarioRole[]
-  turmasLecionadas  ProfessorTurma[]        
-  alunosResponsavel ResponsavelAluno[]      
-  logs              Log[]                  
+  turmasLecionadas  ProfessorTurma[]
+  alunosResponsavel ResponsavelAluno[]
+  logs              Log[]
   cronogramas       Cronograma[]
   eventos           Evento[]
   atividades        Atividade[]
@@ -31,27 +31,29 @@ model Usuario {
 }
 
 model Role {
-  id        Int            @id @default(autoincrement())
-  tipo      TIPO_USUARIO   @unique
-  usuarios  UsuarioRole[]
+  id       Int           @id @default(autoincrement())
+  tipo     TIPO_USUARIO  @unique
+  usuarios UsuarioRole[]
 
   @@map("roles")
 }
 
 model UsuarioRole {
-  id        Int      @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   usuarioId Int
   roleId    Int
-  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
-  role      Role     @relation(fields: [roleId], references: [id])
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  role      Role    @relation(fields: [roleId], references: [id])
+
   @@unique([usuarioId, roleId])
   @@map("usuario_roles")
 }
 
 model Turma {
-  id          Int               @id @default(autoincrement())
-  nome        TURMA             @unique
-  grupo       GRUPO_POR_CAMPO
+  id          Int              @id @default(autoincrement())
+  nome        TURMA            @unique
+  grupoId     Int
+  grupo       GrupoPorCampo    @relation(fields: [grupoId], references: [id])
   alunos      Aluno[]
   professores ProfessorTurma[]
   eventos     Evento[]
@@ -61,11 +63,11 @@ model Turma {
 }
 
 model ProfessorTurma {
-  id          Int       @id @default(autoincrement())
-  usuarioId   Int
-  turmaId     Int
-  usuario     Usuario   @relation(fields: [usuarioId], references: [id])
-  turma       Turma     @relation(fields: [turmaId], references: [id])
+  id        Int     @id @default(autoincrement())
+  usuarioId Int
+  turmaId   Int
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  turma     Turma   @relation(fields: [turmaId], references: [id])
 
   @@unique([usuarioId, turmaId])
   @@map("professores_turmas")
@@ -85,7 +87,7 @@ model Aluno {
   nome         String             @db.VarChar(60)
   dataNasc     DateTime
   isAtivo      Boolean            @default(true)
-  mensalidade  Float?             
+  mensalidade  Float?
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
   turma        Turma              @relation(fields: [turmaId], references: [id])
@@ -103,26 +105,26 @@ enum TIPO_USUARIO {
 }
 
 model ResponsavelAluno {
-  id            Int       @id @default(autoincrement())
-  alunoId       Int
-  usuarioId     Int
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  aluno         Aluno     @relation(fields: [alunoId], references: [id])
-  usuario       Usuario   @relation(fields: [usuarioId], references: [id])
+  id        Int      @id @default(autoincrement())
+  alunoId   Int
+  usuarioId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  aluno     Aluno    @relation(fields: [alunoId], references: [id])
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
 
   @@unique([alunoId, usuarioId])
   @@map("responsaveis_alunos")
 }
 
 model Log {
-  id          Int       @id @default(autoincrement())
-  descricao   String    @db.VarChar(60)
-  complemento String    @db.VarChar(255)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id          Int      @id @default(autoincrement())
+  descricao   String   @db.VarChar(60)
+  complemento String   @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   usuarioId   Int
-  usuario     Usuario   @relation(fields: [usuarioId], references: [id])
+  usuario     Usuario  @relation(fields: [usuarioId], references: [id])
 
   @@map("logs")
 }
@@ -149,22 +151,22 @@ model Diario {
 }
 
 model PeriodoSono {
-  id            Int       @id @default(autoincrement())
-  horaDormiu    String    @db.VarChar(5)   // Formato "HH:MM" 
-  horaAcordou   String    @db.VarChar(5)   // Formato "HH:MM"
-  tempoTotal    String    @db.VarChar(5)   // Formato "HH:MM"
-  diarioId      Int
-  diario        Diario    @relation(fields: [diarioId], references: [id])
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
+  id          Int      @id @default(autoincrement())
+  horaDormiu  String   @db.VarChar(5) // Formato "HH:MM" 
+  horaAcordou String   @db.VarChar(5) // Formato "HH:MM"
+  tempoTotal  String   @db.VarChar(5) // Formato "HH:MM"
+  diarioId    Int
+  diario      Diario   @relation(fields: [diarioId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
   @@map("periodos_sono")
 }
 
 model ItemProvidencia {
-  id        Int                     @id @default(autoincrement())
-  nome      ITEM_PROVIDENCIA        @unique
-  diarios   DiarioItemProvidencia[]
+  id      Int                     @id @default(autoincrement())
+  nome    ITEM_PROVIDENCIA        @unique
+  diarios DiarioItemProvidencia[]
 
   @@map("itens_providencia")
 }
@@ -235,53 +237,65 @@ enum CAMPO_EXPERIENCIA {
 }
 
 model CamposDeExperiencia {
-  id               Int                  @id @default(autoincrement())
-  campoExperiencia CAMPO_EXPERIENCIA    @unique
+  id               Int               @id @default(autoincrement())
+  campoExperiencia CAMPO_EXPERIENCIA @unique
+  objetivos        Objetivo[]
 
   @@map("campo_de_experiencia")
 }
 
 model Cronograma {
-  id          Int           @id @default(autoincrement())
-  titulo      String        @db.VarChar(100)
-  descricao   String        @db.VarChar(500)
-  data        DateTime      @db.Date
-  tipoEvento  TIPO_EVENTO
-  isAtivo     Boolean       @default(true)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  criador     Usuario       @relation(fields: [criadorId], references: [id])
-  criadorId   Int
+  id         Int         @id @default(autoincrement())
+  titulo     String      @db.VarChar(100)
+  descricao  String      @db.VarChar(500)
+  data       DateTime    @db.Date
+  tipoEvento TIPO_EVENTO
+  isAtivo    Boolean     @default(true)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  criador    Usuario     @relation(fields: [criadorId], references: [id])
+  criadorId  Int
 
   @@map("cronogramas")
 }
 
 model Evento {
-  id          Int           @id @default(autoincrement())
-  titulo      String        @db.VarChar(100)
-  descricao   String        @db.VarChar(500)
-  data        DateTime      @db.Date
-  horaInicio  String        @db.VarChar(5)    // Formato "HH:MM"
-  horaFim     String        @db.VarChar(5)    // Formato "HH:MM"
-  tipoEvento  TIPO_EVENTO
-  isAtivo     Boolean       @default(true)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  turma       Turma         @relation(fields: [turmaId], references: [id])
-  turmaId     Int
-  criador     Usuario       @relation(fields: [criadorId], references: [id])
-  criadorId   Int
+  id         Int         @id @default(autoincrement())
+  titulo     String      @db.VarChar(100)
+  descricao  String      @db.VarChar(500)
+  data       DateTime    @db.Date
+  horaInicio String      @db.VarChar(5) // Formato "HH:MM"
+  horaFim    String      @db.VarChar(5) // Formato "HH:MM"
+  tipoEvento TIPO_EVENTO
+  isAtivo    Boolean     @default(true)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  turma      Turma       @relation(fields: [turmaId], references: [id])
+  turmaId    Int
+  criador    Usuario     @relation(fields: [criadorId], references: [id])
+  criadorId  Int
 
   @@map("eventos")
 }
 
+model GrupoPorCampo {
+  id        Int        @id @default(autoincrement())
+  nome      GRUPO_POR_CAMPO @unique
+  turmas    Turma[]
+  objetivos Objetivo[]
+
+  @@map("grupo_por_campo")
+}
+
 model Objetivo {
-  id             Int                @id @default(autoincrement())
-  codigo         String             @db.VarChar(10) @unique
-  descricao      String             @db.VarChar(500)
-  grupo          GRUPO_POR_CAMPO
-  campoExperiencia CAMPO_EXPERIENCIA
-  atividades     Atividade[]
+  id                 Int                 @id @default(autoincrement())
+  codigo             String              @unique @db.VarChar(10)
+  descricao          String              @db.VarChar(500)
+  grupoId            Int
+  grupo              GrupoPorCampo       @relation(fields: [grupoId], references: [id])
+  campoExperienciaId Int
+  campoExperiencia   CamposDeExperiencia @relation(fields: [campoExperienciaId], references: [id])
+  atividades         Atividade[]
 
   @@map("objetivos")
 }
@@ -294,22 +308,22 @@ enum GRUPO_POR_CAMPO {
 }
 
 model Atividade {
-  id              Int               @id @default(autoincrement())
-  ano             Int
-  periodo         SEMESTRE
-  quantHora       Int
-  descricao       String            @db.VarChar(500)
-  data            DateTime          @db.Date
-  isAtivo         Boolean           @default(true)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  professorId     Int
-  turmaId         Int
+  id               Int               @id @default(autoincrement())
+  ano              Int
+  periodo          SEMESTRE
+  quantHora        Int
+  descricao        String            @db.VarChar(500)
+  data             DateTime          @db.Date
+  isAtivo          Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  professorId      Int
+  turmaId          Int
   campoExperiencia CAMPO_EXPERIENCIA
-  objetivoId      Int
-  professor       Usuario           @relation(fields: [professorId], references: [id])
-  turma           Turma             @relation(fields: [turmaId], references: [id])
-  objetivo        Objetivo          @relation(fields: [objetivoId], references: [id])
+  objetivoId       Int
+  professor        Usuario           @relation(fields: [professorId], references: [id])
+  turma            Turma             @relation(fields: [turmaId], references: [id])
+  objetivo         Objetivo          @relation(fields: [objetivoId], references: [id])
 
   @@map("atividades")
 }
