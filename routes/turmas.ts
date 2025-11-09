@@ -41,7 +41,7 @@ const turmaSchema = z.object({
 router.post("/", checkToken, checkRoles(["ADMIN"]), async (req, res) => {
   const valida = turmaSchema.safeParse(req.body)
   if (!valida.success) {
-    res.status(400).json({ erro: valida.error })
+    res.status(400).json({ erro: "Nome de turma inválido", details: valida.error })
     return
   }
 
@@ -55,7 +55,17 @@ router.post("/", checkToken, checkRoles(["ADMIN"]), async (req, res) => {
     })
     res.status(201).json(turma)
   } catch (error) {
-    res.status(400).json(error)
+    if (error instanceof Error && error.message.includes('Grupo')) {
+      res.status(400).json({ 
+        erro: "Erro ao criar turma", 
+        details: error.message 
+      })
+    } else {
+      res.status(400).json({ 
+        erro: "Erro ao criar turma", 
+        details: "Erro interno do servidor" 
+      })
+    }
   }
 })
 
