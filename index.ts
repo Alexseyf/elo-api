@@ -12,6 +12,7 @@ import routesLogin from './routes/login'
 import routesRecuperaSenha from './routes/recuperaSenha'
 import routesValidaSenha from './routes/validaSenha'
 import campos from './routes/campos'
+import objetivosRouter from './routes/objetivos'
 import cors from 'cors'
 import swaggerUi from 'swagger-ui-express'
 import swaggerDocs from './swagger.json'
@@ -47,6 +48,7 @@ app.use('/responsaveis', responsaveisRouter)
 app.use('/diarios', diariosRouter)
 app.use('/cronogramas', cronogramasRouter)
 app.use('/eventos', eventosRouter)
+app.use('/objetivos', objetivosRouter)
 app.use("/login", routesLogin)
 app.use("/recupera-senha", routesRecuperaSenha)
 app.use("/valida-senha", routesValidaSenha)
