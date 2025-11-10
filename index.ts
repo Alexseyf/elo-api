@@ -8,6 +8,7 @@ import responsaveisRouter from './routes/responsaveis'
 import diariosRouter from './routes/diarios'
 import cronogramasRouter from './routes/cronogramas'
 import eventosRouter from './routes/eventos'
+import atividadesRouter from './routes/atividades'
 import routesLogin from './routes/login'
 import routesRecuperaSenha from './routes/recuperaSenha'
 import routesValidaSenha from './routes/validaSenha'
@@ -49,6 +50,7 @@ app.use('/responsaveis', responsaveisRouter)
 app.use('/diarios', diariosRouter)
 app.use('/cronogramas', cronogramasRouter)
 app.use('/eventos', eventosRouter)
+app.use('/atividades', atividadesRouter)
 app.use('/objetivos', objetivosRouter)
 app.use('/grupos', gruposRouter)
 app.use("/login", routesLogin)
