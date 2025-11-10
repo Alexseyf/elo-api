@@ -61,4 +61,50 @@ router.post("/", checkToken, checkRoles(["ADMIN"]), async (req, res) => {
   }
 })
 
+router.get("/turma/:turmaId", checkToken, async (req, res) => {
+  const turmaId = Number(req.params.turmaId)
+  if (isNaN(turmaId) || turmaId <= 0) {
+    return res.status(400).json({ erro: "turmaId inválido" })
+  }
+
+  try {
+    const objetivos = await prisma.objetivo.findMany({
+      where: {
+        grupo: {
+          turmas: {
+            some: { id: turmaId }
+          }
+        }
+      },
+      include: {
+        grupo: true,
+        campoExperiencia: true
+      }
+    })
+    res.json(objetivos)
+  } catch (error) {
+    console.error('Erro ao buscar objetivos da turma:', error)
+    res.status(500).json({ erro: "Erro ao buscar objetivos da turma" })
+  }
+})
+
+router.get("/", checkToken, checkRoles(["ADMIN"]), async (req, res) => {
+  try {
+    const objetivos = await prisma.objetivo.findMany({
+      include: {
+        grupo: true,
+        campoExperiencia: true
+      }
+    })
+    res.status(200).json(objetivos)
+  } catch (error) {
+    console.error('Erro ao listar objetivos:', error)
+    res.status(400).json({ 
+      erro: "Erro ao listar objetivos",
+      details: error instanceof Error ? error.message : "Erro interno do servidor"
+    })
+  }
+})
+
+
 export default router
