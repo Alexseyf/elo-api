@@ -88,7 +88,7 @@ router.get("/turma/:turmaId", checkToken, async (req, res) => {
   }
 })
 
-router.get("/", checkToken, checkRoles(["ADMIN"]), async (req, res) => {
+router.get("/", checkToken, checkRoles(["ADMIN", "PROFESSOR"]), async (req, res) => {
   try {
     const objetivos = await prisma.objetivo.findMany({
       include: {
