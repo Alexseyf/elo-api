@@ -89,24 +89,30 @@ router.get("/turma/:turmaId", checkToken, async (req, res) => {
 })
 
 router.get("/grupo-campo", checkToken, checkRoles(["ADMIN", "PROFESSOR"]), async (req, res) => {
-  const { grupo, campo } = req.query
+  const { grupoId, campoId } = req.query
 
-  if (!grupo || !campo) {
+  if (!grupoId || !campoId) {
     return res.status(400).json({ 
       erro: "Parâmetros inválidos",
-      details: "Os parâmetros 'grupo' e 'campo' são obrigatórios. Exemplo: /objetivos/grupo-campo?grupo=BEBES&campo=EU_OUTRO_NOS"
+      details: "Os parâmetros 'grupoId' e 'campoId' são obrigatórios. Exemplo: /objetivos/grupo-campo?grupoId=1&campoId=1"
+    })
+  }
+
+  const grupoIdNum = Number(grupoId)
+  const campoIdNum = Number(campoId)
+
+  if (isNaN(grupoIdNum) || isNaN(campoIdNum) || grupoIdNum <= 0 || campoIdNum <= 0) {
+    return res.status(400).json({ 
+      erro: "Parâmetros inválidos",
+      details: "grupoId e campoId devem ser números positivos"
     })
   }
 
   try {
     const objetivos = await prisma.objetivo.findMany({
       where: {
-        grupo: {
-          nome: String(grupo) as any
-        },
-        campoExperiencia: {
-          campoExperiencia: String(campo) as any
-        }
+        grupoId: grupoIdNum,
+        campoExperienciaId: campoIdNum
       },
       include: {
         grupo: true,
