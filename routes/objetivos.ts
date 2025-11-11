@@ -88,6 +88,41 @@ router.get("/turma/:turmaId", checkToken, async (req, res) => {
   }
 })
 
+router.get("/grupo-campo", checkToken, checkRoles(["ADMIN", "PROFESSOR"]), async (req, res) => {
+  const { grupo, campo } = req.query
+
+  if (!grupo || !campo) {
+    return res.status(400).json({ 
+      erro: "Parâmetros inválidos",
+      details: "Os parâmetros 'grupo' e 'campo' são obrigatórios. Exemplo: /objetivos/grupo-campo?grupo=BEBES&campo=EU_OUTRO_NOS"
+    })
+  }
+
+  try {
+    const objetivos = await prisma.objetivo.findMany({
+      where: {
+        grupo: {
+          nome: String(grupo) as any
+        },
+        campoExperiencia: {
+          campoExperiencia: String(campo) as any
+        }
+      },
+      include: {
+        grupo: true,
+        campoExperiencia: true
+      }
+    })
+    res.status(200).json(objetivos)
+  } catch (error) {
+    console.error('Erro ao buscar objetivos por grupo e campo:', error)
+    res.status(400).json({ 
+      erro: "Erro ao buscar objetivos",
+      details: error instanceof Error ? error.message : "Erro interno do servidor"
+    })
+  }
+})
+
 router.get("/", checkToken, checkRoles(["ADMIN", "PROFESSOR"]), async (req, res) => {
   try {
     const objetivos = await prisma.objetivo.findMany({
@@ -105,6 +140,8 @@ router.get("/", checkToken, checkRoles(["ADMIN", "PROFESSOR"]), async (req, res)
     })
   }
 })
+
+
 
 
 export default router

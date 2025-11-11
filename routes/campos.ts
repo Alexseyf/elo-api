@@ -28,7 +28,7 @@ router.post("/", checkToken, checkRoles(["ADMIN"]), async (req, res) => {
   }
 })
 
-router.get("/", checkToken, async (req, res) => {
+router.get("/", checkToken, checkRoles(["ADMIN", "PROFESSOR"]), async (req, res) => {
     try {
         const campos = await prisma.camposDeExperiencia.findMany({
             orderBy: {
