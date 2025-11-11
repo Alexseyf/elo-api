@@ -6,7 +6,7 @@ import { checkRoles } from "../middlewares/checkRoles"
 const prisma = new PrismaClient()
 const router = Router()
 
-router.get("/", checkToken, checkRoles(["ADMIN"]), async (req, res) => {
+router.get("/", checkToken, checkRoles(["ADMIN", "PROFESSOR"]), async (req, res) => {
   try {
     const grupos = await prisma.grupoPorCampo.findMany({
       include: {
