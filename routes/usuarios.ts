@@ -266,4 +266,41 @@ router.get("/roles-por-email", async (req, res) => {
   }
 });
 
+router.get("/:usuarioId", async (req, res) => {
+  try {
+    const usuarioId = parseInt(req.params.usuarioId);
+
+    if (isNaN(usuarioId)) {
+      return res.status(400).json({ erro: "ID de usuário inválido" });
+    }
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: usuarioId },
+      include: {
+        roles: {
+          include: {
+            role: true
+          }
+        }
+      }
+    });
+
+    if (!usuario) {
+      return res.status(404).json({ erro: "Usuário não encontrado" });
+    }
+
+    const { senha, ...usuarioSemSenha } = usuario;
+
+    const usuarioFormatado = {
+      ...usuarioSemSenha,
+      roles: usuario.roles.map(ur => ur.role.tipo)
+    };
+
+    res.status(200).json(usuarioFormatado);
+  } catch (error) {
+    console.error("Erro ao buscar usuário:", error);
+    res.status(500).json({ erro: "Erro ao buscar dados do usuário" });
+  }
+});
+
 export default router
