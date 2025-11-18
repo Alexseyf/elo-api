@@ -54,9 +54,9 @@ async function enviarEmail(email: string, nome: string, code: string) {
   });
 
   const mailOptions = {
-    from: `"ELO App" <${process.env.EMAIL_FROM || "noreply@eloapp.com"}>`,
+    from: `"ELO Escola" <${process.env.EMAIL_FROM || "noreply@eloapp.com"}>`,
     to: email,
-    subject: "ELO - Recuperação de senha",
+    subject: "ELO Escola - Recuperação de senha",
     priority: "high" as const,
     headers: {
       'X-Priority': '1',
@@ -65,8 +65,8 @@ async function enviarEmail(email: string, nome: string, code: string) {
       'X-Mailer': 'ELO App System Mailer'
     },
     text: `Olá ${nome},
-    
-Você solicitou a recuperação de senha para sua conta no ELO.
+
+Você solicitou a recuperação de senha para sua conta no ELO Escola.
 
 Seu código de verificação é:
 
@@ -75,14 +75,14 @@ Código: ${code}
 Este código é válido por 5 minutos. Se você não solicitou a recuperação de senha, por favor, ignore este email.
 
 Atenciosamente,
-Equipe ELO`,
+Equipe ELO Escola`,
     html: `<h2>Olá ${nome},</h2>
-    <p>Você solicitou a recuperação de senha para sua conta no ELO.</p>
+    <p>Você solicitou a recuperação de senha para sua conta no ELO Escola.</p>
     <p>Seu código de verificação é:</p>
     <p><strong>Código: ${code}</strong></p>
     <p><em>Este código é válido por 5 minutos. Se você não solicitou a recuperação de senha, por favor, ignore este email.</em></p>
     <br>
-    <p>Atenciosamente,<br>Equipe ELO</p>`
+    <p>Atenciosamente,<br>Equipe ELO Escola</p>`
   };
 
   await transporter.sendMail(mailOptions);
