@@ -30,7 +30,7 @@ const diarioSchema = z.object({
   itensProvidencia: z.array(itemProvidenciaSchema).optional()
 })
 
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", checkToken, checkRoles(["ADMIN", "PROFESSOR"]), async (req: Request, res: Response) => {
   const valida = diarioSchema.safeParse(req.body)
   if (!valida.success) {
     return res.status(400).json({ erro: valida.error })
@@ -66,6 +66,7 @@ router.post("/", async (req: Request, res: Response) => {
 
     let itensProvidenciaIds: { id: number }[] = [];
     if (itensProvidencia && itensProvidencia.length > 0) {
+      console.log('Procurando itens providência:', itensProvidencia);
       const itensEncontrados = await prisma.itemProvidencia.findMany({
         where: {
           nome: {
@@ -76,8 +77,10 @@ router.post("/", async (req: Request, res: Response) => {
           id: true
         }
       });
+      console.log('Itens encontrados no banco:', itensEncontrados);
       itensProvidenciaIds = itensEncontrados;
     }
+    console.log('IDs de itens providência para salvar:', itensProvidenciaIds);
 
     const [ano, mes, dia] = dataFormatada.split('-').map(Number);
     const dataParaSalvar = new Date(ano, mes - 1, dia, 12, 0, 0);
@@ -117,7 +120,7 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/aluno/:alunoId", async (req: Request, res: Response) => {
+router.get("/aluno/:alunoId", checkToken, async (req: Request, res: Response) => {
   try {
     const alunoId = parseInt(req.params.alunoId);
     
@@ -251,6 +254,7 @@ router.patch("/:id", checkRoles([TIPO_USUARIO.PROFESSOR, TIPO_USUARIO.ADMIN]), a
 
     let itensProvidenciaIds: { id: number }[] = [];
     if (itensProvidencia && itensProvidencia.length > 0) {
+      console.log('Procurando itens providência:', itensProvidencia);
       const itensEncontrados = await prisma.itemProvidencia.findMany({
         where: {
           nome: {
@@ -261,8 +265,10 @@ router.patch("/:id", checkRoles([TIPO_USUARIO.PROFESSOR, TIPO_USUARIO.ADMIN]), a
           id: true
         }
       });
+      console.log('Itens encontrados no banco:', itensEncontrados);
       itensProvidenciaIds = itensEncontrados;
     }
+    console.log('IDs de itens providência para salvar:', itensProvidenciaIds);
 
     await prisma.periodoSono.deleteMany({
       where: { diarioId }
