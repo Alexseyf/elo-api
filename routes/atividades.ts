@@ -110,6 +110,48 @@ router.post("/", checkToken, checkRoles([TIPO_USUARIO.PROFESSOR]), async (req, r
 router.get("/", checkToken, checkRoles([TIPO_USUARIO.ADMIN]), async (req, res) => {
   try {
     const atividades = await prisma.atividade.findMany({
+      select: {
+        id: true,
+        ano: true,
+        periodo: true,
+        quantHora: true,
+        data: true,
+        campoExperiencia: true,
+        turma: {
+          select: {
+            id: true,
+            nome: true
+          }
+        }
+      },
+      orderBy: {
+        data: 'desc'
+      }
+    })
+
+    return res.status(200).json({
+      total: atividades.length,
+      atividades
+    })
+  } catch (error) {
+    console.error("Erro ao listar atividades:", error)
+    return res.status(500).json({
+      erro: "Erro ao listar atividades",
+      detalhes: error instanceof Error ? error.message : "Erro desconhecido"
+    })
+  }
+})
+
+router.get("/:id", checkToken, checkRoles([TIPO_USUARIO.ADMIN]), async (req, res) => {
+  try {
+    const atividadeId = parseInt(req.params.id)
+
+    if (isNaN(atividadeId)) {
+      return res.status(400).json({ erro: "ID de atividade inválido" })
+    }
+
+    const atividade = await prisma.atividade.findUnique({
+      where: { id: atividadeId },
       include: {
         professor: {
           select: {
@@ -132,20 +174,18 @@ router.get("/", checkToken, checkRoles([TIPO_USUARIO.ADMIN]), async (req, res) =
             descricao: true
           }
         }
-      },
-      orderBy: {
-        data: 'desc'
       }
     })
 
-    return res.status(200).json({
-      total: atividades.length,
-      atividades
-    })
+    if (!atividade) {
+      return res.status(404).json({ erro: "Atividade não encontrada" })
+    }
+
+    return res.status(200).json(atividade)
   } catch (error) {
-    console.error("Erro ao listar atividades:", error)
+    console.error("Erro ao buscar atividade:", error)
     return res.status(500).json({
-      erro: "Erro ao listar atividades",
+      erro: "Erro ao buscar atividade",
       detalhes: error instanceof Error ? error.message : "Erro desconhecido"
     })
   }
