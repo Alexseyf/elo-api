@@ -156,7 +156,7 @@ router.get("/:turmaId/alunos", async (req, res) => {
   }
 })
 
-router.get("/totalAlunosTurma", async (req, res) => {
+router.get("/totalAlunosTurma", checkToken, checkRoles(["ADMIN"]), async (req, res) => {
   try {
     const turmasComTotalAlunos = await prisma.turma.findMany({
       include: {
