@@ -107,4 +107,48 @@ router.post("/", checkToken, checkRoles([TIPO_USUARIO.PROFESSOR]), async (req, r
   }
 })
 
+router.get("/", checkToken, checkRoles([TIPO_USUARIO.ADMIN]), async (req, res) => {
+  try {
+    const atividades = await prisma.atividade.findMany({
+      include: {
+        professor: {
+          select: {
+            id: true,
+            nome: true,
+            email: true,
+            telefone: true
+          }
+        },
+        turma: {
+          select: {
+            id: true,
+            nome: true
+          }
+        },
+        objetivo: {
+          select: {
+            id: true,
+            codigo: true,
+            descricao: true
+          }
+        }
+      },
+      orderBy: {
+        data: 'desc'
+      }
+    })
+
+    return res.status(200).json({
+      total: atividades.length,
+      atividades
+    })
+  } catch (error) {
+    console.error("Erro ao listar atividades:", error)
+    return res.status(500).json({
+      erro: "Erro ao listar atividades",
+      detalhes: error instanceof Error ? error.message : "Erro desconhecido"
+    })
+  }
+})
+
 export default router
