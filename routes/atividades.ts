@@ -66,7 +66,8 @@ router.post("/", checkToken, checkRoles([TIPO_USUARIO.PROFESSOR]), async (req, r
     const atividade = await prisma.atividade.create({
       data: {
         ...valida.data,
-        data: new Date(valida.data.data),
+        // Salva apenas a parte da data (YYYY-MM-DD) para evitar problemas de fuso horário
+        data: valida.data.data.split('T')[0],
         professorId: req.user!.id,
         isAtivo: valida.data.isAtivo !== undefined ? valida.data.isAtivo : true
       },
