@@ -12,7 +12,7 @@ const atividadeSchema = z.object({
   periodo: z.nativeEnum(SEMESTRE),
   quantHora: z.number().int().positive(),
   descricao: z.string().min(1).max(500),
-  data: z.string().datetime(),
+  data: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // Aceita apenas data no formato YYYY-MM-DD
   turmaId: z.number().int().positive(),
   campoExperiencia: z.nativeEnum(CAMPO_EXPERIENCIA),
   objetivoId: z.number().int().positive(),
