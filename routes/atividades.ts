@@ -12,7 +12,7 @@ const atividadeSchema = z.object({
   periodo: z.nativeEnum(SEMESTRE),
   quantHora: z.number().int().positive(),
   descricao: z.string().min(1).max(500),
-  data: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // Aceita apenas data no formato YYYY-MM-DD
+  data: z.string().datetime(),
   turmaId: z.number().int().positive(),
   campoExperiencia: z.nativeEnum(CAMPO_EXPERIENCIA),
   objetivoId: z.number().int().positive(),
@@ -66,8 +66,7 @@ router.post("/", checkToken, checkRoles([TIPO_USUARIO.PROFESSOR]), async (req, r
     const atividade = await prisma.atividade.create({
       data: {
         ...valida.data,
-        // Salva apenas a parte da data (YYYY-MM-DD) para evitar problemas de fuso horário
-        data: valida.data.data.split('T')[0],
+        data: new Date(valida.data.data),
         professorId: req.user!.id,
         isAtivo: valida.data.isAtivo !== undefined ? valida.data.isAtivo : true
       },
