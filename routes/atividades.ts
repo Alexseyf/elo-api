@@ -142,6 +142,71 @@ router.get("/", checkToken, checkRoles([TIPO_USUARIO.ADMIN]), async (req, res) =
   }
 })
 
+router.get("/relatorio/campo-experiencia", checkToken, checkRoles([TIPO_USUARIO.ADMIN]), async (req, res) => {
+  try {
+    const atividadesPorCampo = await prisma.atividade.groupBy({
+      by: ['campoExperiencia'],
+      _count: {
+        id: true
+      },
+      orderBy: {
+        _count: {
+          id: 'desc'
+        }
+      }
+    })
+
+    const atividadesPorCampoETurma = await prisma.atividade.groupBy({
+      by: ['campoExperiencia', 'turmaId'],
+      _count: {
+        id: true
+      }
+    })
+
+    const turmas = await prisma.turma.findMany({
+      select: {
+        id: true,
+        nome: true
+      }
+    })
+
+    const turmasMap = turmas.reduce((acc, turma) => {
+      acc[turma.id] = turma.nome
+      return acc
+    }, {} as Record<number, string>)
+    const relatorio = atividadesPorCampo.map(campo => {
+      const detalhesPorTurma = atividadesPorCampoETurma
+        .filter(item => item.campoExperiencia === campo.campoExperiencia)
+        .map(item => ({
+          turmaId: item.turmaId,
+          turma: turmasMap[item.turmaId] || 'Turma não encontrada',
+          total: item._count.id
+        }))
+        .sort((a, b) => b.total - a.total)
+
+      return {
+        campoExperiencia: campo.campoExperiencia,
+        totalGeral: campo._count.id,
+        detalhesPorTurma
+      }
+    })
+
+    return res.status(200).json({
+      resumo: {
+        totalAtividades: atividadesPorCampo.reduce((acc, campo) => acc + campo._count.id, 0),
+        totalCampos: atividadesPorCampo.length
+      },
+      relatorio
+    })
+  } catch (error) {
+    console.error("Erro ao gerar relatório por campo de experiência:", error)
+    return res.status(500).json({
+      erro: "Erro ao gerar relatório por campo de experiência",
+      detalhes: error instanceof Error ? error.message : "Erro desconhecido"
+    })
+  }
+})
+
 router.get("/:id", checkToken, checkRoles([TIPO_USUARIO.ADMIN]), async (req, res) => {
   try {
     const atividadeId = parseInt(req.params.id)
