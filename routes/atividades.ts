@@ -63,10 +63,18 @@ router.post("/", checkToken, checkRoles([TIPO_USUARIO.PROFESSOR]), async (req, r
       return res.status(404).json({ erro: "Objetivo não encontrado" })
     }
 
+    let dataLocal;
+    if (typeof valida.data.data === 'string' && valida.data.data.length === 10) {
+      const [ano, mes, dia] = valida.data.data.split('-').map(Number);
+      dataLocal = new Date(Date.UTC(ano, mes - 1, dia, 3, 0, 0));
+    } else {
+      dataLocal = new Date(valida.data.data);
+    }
+
     const atividade = await prisma.atividade.create({
       data: {
         ...valida.data,
-        data: new Date(valida.data.data),
+        data: dataLocal,
         professorId: req.user!.id,
         isAtivo: valida.data.isAtivo !== undefined ? valida.data.isAtivo : true
       },
