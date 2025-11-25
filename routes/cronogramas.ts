@@ -34,13 +34,19 @@ router.post("/", checkToken, checkRoles(["ADMIN"]), async (req: Request, res: Re
   }
 
   try {
-    const dataFormatada = normalizarData(valida.data.data);
+    let dataLocal;
+    if (typeof valida.data.data === 'string' && valida.data.data.length === 10) {
+      const [ano, mes, dia] = valida.data.data.split('-').map(Number);
+      dataLocal = new Date(Date.UTC(ano, mes - 1, dia, 3, 0, 0));
+    } else {
+      dataLocal = new Date(valida.data.data);
+    }
 
     const cronograma = await prisma.cronograma.create({
       data: {
         titulo: valida.data.titulo,
         descricao: valida.data.descricao,
-        data: new Date(dataFormatada),
+        data: dataLocal,
         tipoEvento: valida.data.tipoEvento,
         isAtivo: valida.data.isAtivo,
         criadorId: valida.data.criadorId
@@ -135,7 +141,13 @@ router.put("/:id", checkToken, checkRoles(["ADMIN"]), async (req: Request, res: 
 
   try {
     const id = parseInt(req.params.id)
-    const dataFormatada = normalizarData(valida.data.data);
+    let dataLocal;
+    if (typeof valida.data.data === 'string' && valida.data.data.length === 10) {
+      const [ano, mes, dia] = valida.data.data.split('-').map(Number);
+      dataLocal = new Date(Date.UTC(ano, mes - 1, dia, 3, 0, 0));
+    } else {
+      dataLocal = new Date(valida.data.data);
+    }
     
     const cronogramaExistente = await prisma.cronograma.findUnique({
       where: { id }
@@ -150,7 +162,7 @@ router.put("/:id", checkToken, checkRoles(["ADMIN"]), async (req: Request, res: 
       data: {
         titulo: valida.data.titulo,
         descricao: valida.data.descricao,
-        data: new Date(dataFormatada),
+        data: dataLocal,
         tipoEvento: valida.data.tipoEvento,
         isAtivo: valida.data.isAtivo,
         criadorId: valida.data.criadorId
@@ -173,7 +185,6 @@ router.patch("/:id", checkToken, checkRoles(["ADMIN", "PROFESSOR"]), async (req:
 
   try {
     const id = parseInt(req.params.id)
-
     const cronogramaExistente = await prisma.cronograma.findUnique({
       where: { id }
     })
@@ -183,10 +194,13 @@ router.patch("/:id", checkToken, checkRoles(["ADMIN", "PROFESSOR"]), async (req:
     }
 
     let dadosAtualizacao: any = { ...valida.data };
-    
     if (valida.data.data) {
-      const dataFormatada = normalizarData(valida.data.data);
-      dadosAtualizacao.data = new Date(dataFormatada);
+      if (typeof valida.data.data === 'string' && valida.data.data.length === 10) {
+        const [ano, mes, dia] = valida.data.data.split('-').map(Number);
+        dadosAtualizacao.data = new Date(Date.UTC(ano, mes - 1, dia, 3, 0, 0));
+      } else {
+        dadosAtualizacao.data = new Date(valida.data.data);
+      }
     }
 
     const cronograma = await prisma.cronograma.update({
