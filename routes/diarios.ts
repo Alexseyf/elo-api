@@ -155,6 +155,7 @@ router.get("/aluno/:alunoId", checkToken, async (req: Request, res: Response) =>
       where: { alunoId },
       orderBy: { data: 'desc' },
       include: {
+        aluno: true,
         periodosSono: true,
         itensProvidencia: {
           include: {
