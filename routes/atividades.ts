@@ -264,4 +264,59 @@ router.get("/:id", checkToken, checkRoles([TIPO_USUARIO.ADMIN]), async (req, res
   }
 })
 
+router.get("/turma-atividades/:professorId", checkToken, checkRoles([TIPO_USUARIO.PROFESSOR]), async (req, res) => {
+  try {
+    const professorId = parseInt(req.params.professorId)
+    if (isNaN(professorId)) {
+      return res.status(400).json({ erro: "ID de professor inválido" })
+    }
+
+    const turma = await prisma.turma.findFirst({
+      where: {
+        professores: {
+          some: { id: professorId }
+        }
+      },
+      select: {
+        id: true,
+        nome: true
+      }
+    })
+
+    if (!turma) {
+      return res.status(404).json({ erro: "Turma não encontrada para o professor" })
+    }
+    const atividades = await prisma.atividade.findMany({
+      where: { turmaId: turma.id },
+      select: {
+        id: true,
+        ano: true,
+        periodo: true,
+        quantHora: true,
+        data: true,
+        campoExperiencia: true,
+        objetivo: {
+          select: {
+            id: true,
+            codigo: true,
+            descricao: true
+          }
+        }
+      },
+      orderBy: { data: 'desc' }
+    })
+
+    return res.status(200).json({
+      turma,
+      atividades
+    })
+  } catch (error) {
+    console.error("Erro ao buscar atividades da turma do professor:", error)
+    return res.status(500).json({
+      erro: "Erro ao buscar atividades da turma do professor",
+      detalhes: error instanceof Error ? error.message : "Erro desconhecido"
+    })
+  }
+})
+
 export default router
