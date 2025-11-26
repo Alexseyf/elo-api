@@ -271,8 +271,21 @@ router.get("/turma-atividades/:professorId", checkToken, checkRoles([TIPO_USUARI
       return res.status(400).json({ erro: "ID de professor inválido" })
     }
 
+    const turmasRelacionadas = await prisma.turma.findMany({
+      where: { professores: { some: { id: professorId } } },
+      select: { id: true, nome: true }
+    })
+    const turmaIds = turmasRelacionadas.map(t => t.id)
+
+    if (!turmaIds.length) {
+      return res.status(404).json({ erro: "Nenhuma turma relacionada ao professor" })
+    }
+
     const atividades = await prisma.atividade.findMany({
-      where: { professorId },
+      where: {
+        turmaId: { in: turmaIds },
+        professorId
+      },
       select: {
         id: true,
         ano: true,
@@ -298,20 +311,11 @@ router.get("/turma-atividades/:professorId", checkToken, checkRoles([TIPO_USUARI
     })
 
     if (!atividades.length) {
-      return res.status(404).json({ erro: "Nenhuma atividade encontrada para o professor" })
+      return res.status(404).json({ erro: "Nenhuma atividade encontrada para o professor nas turmas relacionadas" })
     }
 
-    const turmas: { id: number, nome: string }[] = [];
-    const turmaIds = new Set<number>();
-    atividades.forEach(a => {
-      if (a.turma && !turmaIds.has(a.turma.id)) {
-        turmas.push(a.turma);
-        turmaIds.add(a.turma.id);
-      }
-    });
-
     return res.status(200).json({
-      turmas,
+      turmas: turmasRelacionadas,
       atividades
     })
   } catch (error) {
