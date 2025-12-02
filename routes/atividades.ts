@@ -215,7 +215,7 @@ router.get("/relatorio/campo-experiencia", checkToken, checkRoles([TIPO_USUARIO.
   }
 })
 
-router.get("/:id", checkToken, checkRoles([TIPO_USUARIO.ADMIN]), async (req, res) => {
+router.get("/:id", checkToken, checkRoles([TIPO_USUARIO.ADMIN, TIPO_USUARIO.PROFESSOR]), async (req, res) => {
   try {
     const atividadeId = parseInt(req.params.id)
 
